@@ -111,8 +111,8 @@ for index, (train_index, val_index) in enumerate(new_splits[0:], start=0):
                                  labels=list(range(11)), average='macro')
             print("train_f1: {:0.6f}, valid_f1: {:0.6f}".format(train_score, val_score))
 
-            writer.add_scalars('data/loss', {'train': train_loss, 'val': valid_loss}, epoch)
-            writer.add_scalars('data/f1_score', {'train': train_score, 'val': val_score}, epoch)
+            writer.add_scalars('cv_{}/loss'.format(index), {'train': train_loss, 'val': valid_loss}, epoch)
+            writer.add_scalars('cv_{}/f1_score'.format(index), {'train': train_score, 'val': val_score}, epoch)
             if early_stopping(val_score, model):
                 print("Early Stopping...")
                 print("Best Val Score: {:0.6f}".format(early_stopping.best_score))

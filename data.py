@@ -27,8 +27,8 @@ from pytorch_toolbelt import losses as L
 import pandas as pd
 import numpy as np
 if torch.cuda.is_available():
-    train = pd.read_csv('/local/ULIS/train_clean.csv')
-    test = pd.read_csv('/local/ULIS/test_clean.csv')
+    train = pd.read_csv('/local/ULIS/data/train_clean.csv')
+    test = pd.read_csv('/local/ULIS/data/test_clean.csv')
 else:
     train = pd.read_csv('./data/train_clean.csv')
     test = pd.read_csv('./data/test_clean.csv')

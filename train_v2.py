@@ -147,7 +147,7 @@ for index, (train_index, val_index) in enumerate(new_splits[0:], start=0):
                 arr=test_preds_iter)
         np.save('./predictions/test/gru_clean_fold_{}_raw_exp_{}.npy'.format(index, expriment_id), arr=test_preds_all)
 
-ss = pd.read_csv("/local/ULIS/sample_submission.csv", dtype={'time': str})
+ss = pd.read_csv("/local/ULIS/data/sample_submission.csv", dtype={'time': str})
 
 test_preds_all = test_preds_all / np.sum(test_preds_all, axis=1)[:, None]
 test_pred_frame = pd.DataFrame({'time': ss['time'].astype(str),

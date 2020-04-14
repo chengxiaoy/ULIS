@@ -13,7 +13,7 @@ from sklearn.metrics import f1_score
 from data import new_splits, trainval, trainval_y, test, test_y, test_preds_all
 from tensorboardX import SummaryWriter
 
-expriment_id = 2
+expriment_id = 3
 writer = SummaryWriter(logdir=os.path.join("board/", str(expriment_id)))
 
 if not os.path.exists("./models"):
@@ -34,7 +34,7 @@ for index, (train_index, val_index) in enumerate(new_splits[0:], start=0):
     test_preds_iter = np.zeros((2000000, 11))
     it = 0
     for it in range(1):
-        device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
+        device = torch.device("cuda:1") if torch.cuda.is_available() else torch.device("cpu")
         model = Seq2SeqRnn(input_size=trainval.shape[1], seq_len=4000, hidden_size=64, output_size=11, num_layers=2,
                            hidden_layers=[64, 64, 64],
                            bidirectional=True).to(device)
@@ -46,8 +46,8 @@ for index, (train_index, val_index) in enumerate(new_splits[0:], start=0):
                                            it, expriment_id))
         criterion = L.FocalLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-        schedular = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=10)
-        # schedular = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=len(train_dataloader))
+        # schedular = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=10)
+        schedular = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer, mode='min', patience=5)
         avg_train_losses, avg_valid_losses = [], []
 
         for epoch in range(no_of_epochs):
@@ -80,7 +80,6 @@ for index, (train_index, val_index) in enumerate(new_splits[0:], start=0):
 
                 train_true = torch.cat([train_true, y_], 0)
                 train_preds = torch.cat([train_preds, predictions_], 0)
-            schedular.step()
 
             model.eval()  # prep model for evaluation
             val_preds, val_true = torch.Tensor([]).to(device), torch.LongTensor([]).to(device)
@@ -104,6 +103,9 @@ for index, (train_index, val_index) in enumerate(new_splits[0:], start=0):
             valid_loss = np.average(valid_losses)
             avg_train_losses.append(train_loss)
             avg_valid_losses.append(valid_loss)
+
+            schedular.step(valid_loss)
+
 
             print("train_loss: {:0.6f}, valid_loss: {:0.6f}".format(train_loss, valid_loss))
 
@@ -141,8 +143,9 @@ for index, (train_index, val_index) in enumerate(new_splits[0:], start=0):
         test_preds_all += test_preds
         if not os.path.exists("./predictions/test"):
             os.makedirs("./predictions/test")
-        np.save('./predictions/test/gru_clean_fold_{}_iter_{}_raw_exp_{}.npy'.format(index, it,expriment_id), arr=test_preds_iter)
-        np.save('./predictions/test/gru_clean_fold_{}_raw_exp_{}.npy'.format(index,expriment_id), arr=test_preds_all)
+        np.save('./predictions/test/gru_clean_fold_{}_iter_{}_raw_exp_{}.npy'.format(index, it, expriment_id),
+                arr=test_preds_iter)
+        np.save('./predictions/test/gru_clean_fold_{}_raw_exp_{}.npy'.format(index, expriment_id), arr=test_preds_all)
 
 ss = pd.read_csv("/local/ULIS/sample_submission.csv", dtype={'time': str})
 

@@ -33,7 +33,7 @@ class Seq2SeqRnn(nn.Module):
 
         else:
             self.hidden_layers = []
-            self.intermediate_layer = nn.Linear(hidden_size * 2 if bidirectional else hidden_siz, self.input_size)
+            self.intermediate_layer = nn.Linear(hidden_size * 2 if bidirectional else hidden_size, self.input_size)
             self.output_layer = nn.Linear(hidden_size * 2 if bidirectional else hidden_size, output_size)
             nn.init.kaiming_normal_(self.output_layer.weight.data)
 

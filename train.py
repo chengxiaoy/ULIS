@@ -54,7 +54,7 @@ for index, (train_index, val_index) in enumerate(new_splits[0:], start=0):
             start_time = time.time()
 
             print("Epoch : {}".format(epoch))
-            print("learning_rate: {:0.9f}".format(schedular.get_lr()[0]))
+            # print("learning_rate: {:0.9f}".format(schedular.get_lr()[0]))
             train_losses, valid_losses = [], []
 
             model.train()  # prep model for training

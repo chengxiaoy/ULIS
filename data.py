@@ -34,8 +34,6 @@ else:
     train = pd.read_csv('./data/train_clean.csv')
     test = pd.read_csv('./data/test_clean.csv')
 
-
-
 train['filter'] = 0
 test['filter'] = 2
 ts1 = pd.concat([train, test], axis=0, sort=False).reset_index(drop=True)

@@ -1,17 +1,17 @@
 import os
 
-
 import pandas as pd
 import numpy as np
 import json
+
 pd.options.display.max_rows = 1000
 pd.options.display.max_columns = 1000
 
 import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score,f1_score
+from sklearn.metrics import accuracy_score, f1_score
 import time
-from torch.utils.data import Dataset,DataLoader
+from torch.utils.data import Dataset, DataLoader
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -19,19 +19,22 @@ from functools import partial
 from sklearn.model_selection import KFold
 import gc
 from tqdm import tqdm
-from itertools import groupby,accumulate
+from itertools import groupby, accumulate
 from random import shuffle
-from sklearn.model_selection import GroupKFold,GroupShuffleSplit,LeaveOneGroupOut
+from sklearn.model_selection import GroupKFold, GroupShuffleSplit, LeaveOneGroupOut
 from sklearn.preprocessing import MinMaxScaler
 from pytorch_toolbelt import losses as L
 import pandas as pd
 import numpy as np
+
 if torch.cuda.is_available():
     train = pd.read_csv('/local/ULIS/data/train_clean.csv')
     test = pd.read_csv('/local/ULIS/data/test_clean.csv')
 else:
     train = pd.read_csv('./data/train_clean.csv')
     test = pd.read_csv('./data/test_clean.csv')
+
+
 
 train['filter'] = 0
 test['filter'] = 2
@@ -77,8 +80,8 @@ trainval = np.array(list(ts1[ts1['filter'] == 0].groupby('group').apply(lambda x
 test = np.array(list(ts1[ts1['filter'] == 2].groupby('group').apply(lambda x: x[use_cols].values)))
 trainval_y = np.array(list(ts1[ts1['filter'] == 0].groupby('group').apply(lambda x: x[['open_channels']].values)))
 
-trainval = trainval.transpose((0,2,1))
-test = test.transpose((0,2,1))
+trainval = trainval.transpose((0, 2, 1))
+test = test.transpose((0, 2, 1))
 
 trainval_y = trainval_y.reshape(trainval_y.shape[:2])
 test_y = np.zeros((test.shape[0], trainval_y.shape[1]))

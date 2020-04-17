@@ -4,6 +4,8 @@ import pandas as pd
 import seaborn as sns
 from pomegranate import NormalDistribution
 from sklearn.metrics import f1_score, accuracy_score
+import helper
+import time
 
 
 def viterbi(p_trans, p_signal, p_in, signal):
@@ -35,11 +37,41 @@ def viterbi(p_trans, p_signal, p_in, signal):
     return states
 
 
+def viterbi_2(p_trans, emiting_pdf, p_in, signal):
+    offset = 10 ** (-20)  # added to values to avoid problems with log2(0)
 
+    p_trans_tlog = np.transpose(np.log2(p_trans + offset))  # p_trans, logarithm + transposed
+    p_in_log = np.log2(p_in + offset)  # p_in, logarithm
 
-df_train = pd.read_csv("data/train.csv")
-signal = df_train['signal'].values[2000000:2500000]
-true_state = df_train['open_channels'].values[2000000:2500000]
+    p_signal_tlog = [None] * len(emiting_pdf.keys())
+    for state in sorted(emiting_pdf.keys()):
+        p_signal_tlog[state] = np.log2(emiting_pdf[state].probability(signal) + offset)
+
+    p_signal_tlog = np.transpose(np.array(p_signal_tlog))
+    # p_signal_tlog = normalize(p_signal_tlog)
+
+    p_state_log = [p_in_log + p_signal_tlog[0]]  # initial state probabilities for signal element 0
+    p_max_pre = []
+    i = 1
+    for s in signal[1:]:
+        p_max_pre.append(np.argmax(p_state_log[-1] + p_trans_tlog, axis=1))
+
+        p_state_log.append(
+            np.max(p_state_log[-1] + p_trans_tlog, axis=1) + p_signal_tlog[i])  # the Viterbi algorithm
+        i = i + 1
+
+    max_states = np.argmax(p_state_log, axis=1)  # finding the most probable states
+    # return max_states
+    last_state = max_states[-1]
+    # last_state = 6
+
+    states = []
+    states.insert(0, last_state)
+    for i in range(len(max_states) - 1):
+        states.insert(0, p_max_pre[-1 - i][states[0]])
+
+    print(len(states))
+    return states
 
 
 def calc_markov_p_trans(states):
@@ -54,9 +86,6 @@ def calc_markov_p_trans(states):
             current_row = current_row / np.sum(current_row)  # normalize to 1
         matrix.append(current_row)
     return np.array(matrix)
-
-
-p_trans = calc_markov_p_trans(true_state)
 
 
 def calc_markov_p_signal(state, signal, num_bins=3000):
@@ -76,7 +105,7 @@ def calc_markov_p_signal_2(states, signals):
 
 
 # emiting_pdf = calc_markov_p_signal_2(true_state, signal)
-p_signal, signal_bins = calc_markov_p_signal(true_state, signal)
+# p_signal, signal_bins = calc_markov_p_signal(true_state, signal)
 
 
 def digitize_signal(signal, signal_bins):
@@ -90,41 +119,51 @@ def digitize_signal(signal, signal_bins):
 # p_in = np.ones(len(p_trans)) / len(p_trans)
 # print("Initial probability p_in =", p_in)
 # viterbi_state = viterbi(p_trans, p_signal, p_in, signal_dig)
-# print("State sequence as predicted by Viterbi algorithm :", viterbi_state)
+# print("State sequence as decodinged by Viterbi algorithm :", viterbi_state)
 #
 # print("Accuracy =", accuracy_score(y_pred=viterbi_state, y_true=true_state))
 # print("F1 macro =", f1_score(y_pred=viterbi_state, y_true=true_state, average='macro'))
 
-with np.load('data/train_detrend.npz', allow_pickle=True) as data:
-    train_signal = data['train_signal']
-    train_opchan = data['train_opench']
-    train_groups = data['train_groups']
+class ViterbiModel():
+    def __init__(self):
+        self.p_trans = None
+        self.p_emit = None
+        self.p_in = None
+        self.signal_bins = None
 
-with np.load('data/test_detrend.npz', allow_pickle=True) as data:
-    test_signal = data['test_signal']
-    test_groups = data['test_groups']
+    def learning(self, states, signals):
+        self.p_trans = calc_markov_p_trans(states)
+        # self.p_emit = calc_markov_p_signal_2(states, signals)
+        self.p_emit, self.signal_bins = calc_markov_p_signal(states, signals)
+        self.p_in = np.ones(len(self.p_trans)) / len(self.p_trans)
+        return self
 
-train_group_ids = [[0, 1, 2], [3, 7], [4, 8], [6, 9], [5, 10]]
-test_group_ids = [[0, 3, 8, 10, 11], [4], [1, 9], [2, 6], [5, 7]]
-test_y_pred = [None] * 12
+    def decoding(self, signals):
+        signal_dig = digitize_signal(signals, self.signal_bins)
+        # return viterbi_2(self.p_trans, self.p_emit, self.p_in, signals)
+        return viterbi(self.p_trans, self.p_emit, self.p_in, signal_dig)
 
-for train_groups, test_groups in zip(train_group_ids, test_group_ids):
 
-    print("train_groups :", train_groups, ", test_groups :", test_groups)
+if __name__ == '__main__':
 
-    signal_train = np.concatenate(train_signal[train_groups])
-    true_state_train = np.concatenate(train_opchan[train_groups])
+    train_states, train_signals, train_groups, test_signals, test_groups = helper.load_data()
+    test_y_pred = [None] * np.sum([len(x) for x in test_groups])
+    for train_group, test_group in zip(train_groups, test_groups):
+        since = time.time()
 
-    p_trans = calc_markov_p_trans(true_state_train)
-    p_signal, signal_bins = calc_markov_p_signal(true_state_train, signal_train)
-    p_in = np.ones(len(p_trans)) / len(p_trans)
+        print("train_groups :", train_group, ", test_groups :", test_group)
 
-    for test_grp in test_groups:
-        signal_dig = digitize_signal(test_signal[test_grp], signal_bins)
-        test_y_pred[test_grp] = viterbi(p_trans, p_signal, p_in, signal_dig)
+        signal_train = np.concatenate(train_signals[train_group])
+        true_state_train = np.concatenate(train_states[train_group])
+        model = ViterbiModel()
+        model.learning(true_state_train, signal_train)
 
-test_y_pred = np.concatenate(test_y_pred)
+        for test_grp in test_group:
+            test_y_pred[test_grp] = model.decoding(test_signals[test_grp])
+        print("cost {} s".format(time.time() - since))
 
-df_subm = pd.read_csv("data/sample_submission.csv")
-df_subm['open_channels'] = test_y_pred
-df_subm.to_csv("viterbi.csv", float_format='%.4f', index=False)
+    test_y_pred = np.concatenate(test_y_pred)
+
+    df_subm = pd.read_csv("data/sample_submission.csv")
+    df_subm['open_channels'] = test_y_pred
+    df_subm.to_csv("viterbi_new.csv", float_format='%.4f', index=False)

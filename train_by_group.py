@@ -121,8 +121,9 @@ for train_group, test_group in zip(train_groups, test_groups):
     train_group_indexs = np.concatenate(train_group_indexs)
     test_group_indexs = np.concatenate(test_group_indexs)
 
-    test = test[test_group_indexs]
-    test_dataset = IonDataset(test, test_y, flip=False, noise_level=0.0, class_split=0.0)
+    test_group = test[test_group_indexs]
+
+    test_dataset = IonDataset(test_group, test_y[test_group_indexs], flip=False, noise_level=0.0, class_split=0.0)
     test_dataloader = DataLoader(test_dataset, 16, shuffle=False, num_workers=8, pin_memory=True)
 
     test_preds_all = np.zeros([len(test_group) * 100000, 11])
@@ -153,7 +154,7 @@ for train_group, test_group in zip(train_groups, test_groups):
         criterion = L.FocalLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
         schedular = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=10)
-        train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 1, group_id)
+        train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 150, group_id)
 
         model.load_state_dict(
             torch.load(

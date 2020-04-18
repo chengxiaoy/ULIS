@@ -124,7 +124,7 @@ for train_group, test_group in zip(train_groups, test_groups):
     test_dataset = IonDataset(test, test_y, flip=False, noise_level=0.0, class_split=0.0)
     test_dataloader = DataLoader(test_dataset, 16, shuffle=False, num_workers=8, pin_memory=True)
 
-    test_preds_all = np.zeros(len(test_group) * 100000, 11)
+    test_preds_all = np.zeros([len(test_group) * 100000, 11])
 
     for index in range(1):
         train_index, val_index = new_splits[index]

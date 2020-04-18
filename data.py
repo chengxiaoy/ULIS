@@ -43,7 +43,7 @@ ts1['time2'] = pd.cut(ts1['time'], bins=np.linspace(0.0000, 700., num=14 + 1), l
 ts1['time2'] = ts1.groupby('time2')['time'].rank() / 500000.
 
 np.random.seed(321)
-ts1['group'] = pd.cut(ts1['time'], bins=np.linspace(0.0000, 700., num=14 * 125 + 1), labels=list(range(14 * 125)),
+ts1['group'] = pd.cut(ts1['time'], bins=np.linspace(0.0000, 700., num=14 * 1250 + 1), labels=list(range(14 * 1250)),
                       include_lowest=True).astype(int)
 np.random.seed(321)
 

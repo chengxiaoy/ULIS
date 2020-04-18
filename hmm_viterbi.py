@@ -120,9 +120,8 @@ def digitize_signal(signal, signal_bins):
 # print("Initial probability p_in =", p_in)
 # viterbi_state = viterbi(p_trans, p_signal, p_in, signal_dig)
 # print("State sequence as decodinged by Viterbi algorithm :", viterbi_state)
-#
-# print("Accuracy =", accuracy_score(y_pred=viterbi_state, y_true=true_state))
-# print("F1 macro =", f1_score(y_pred=viterbi_state, y_true=true_state, average='macro'))
+
+
 
 class ViterbiModel():
     def __init__(self):
@@ -161,9 +160,13 @@ if __name__ == '__main__':
         for test_grp in test_group:
             test_y_pred[test_grp] = model.decoding(test_signals[test_grp])
         print("cost {} s".format(time.time() - since))
+        print("Accuracy =", accuracy_score(y_pred=viterbi_state, y_true=true_state))
+        print("F1 macro =", f1_score(y_pred=viterbi_state, y_true=true_state, average='macro'))
 
     test_y_pred = np.concatenate(test_y_pred)
 
     df_subm = pd.read_csv("data/sample_submission.csv")
     df_subm['open_channels'] = test_y_pred
     df_subm.to_csv("viterbi_new.csv", float_format='%.4f', index=False)
+
+

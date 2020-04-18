@@ -14,7 +14,7 @@ from data import new_splits, trainval, trainval_y, test, test_y, test_preds_all
 from tensorboardX import SummaryWriter
 import numpy as np
 
-expriment_id = 5
+expriment_id = 6
 writer = SummaryWriter(logdir=os.path.join("board/", str(expriment_id)))
 
 
@@ -104,10 +104,11 @@ test_data_n = len(test)
 train_indexs = list(range(train_data_n))
 test_indexs = list(range(test_data_n))
 
-group_id = 0
-
 pred = np.zeros([20, 100000])
-for train_group, test_group in zip(train_groups, test_groups):
+for group_id in range(1):
+    group_id = 4
+    train_group = train_groups[group_id]
+    test_group = test_groups[group_id]
     train_index, val_index = new_splits[0]
     train_group_indexs = []
     test_group_indexs = []
@@ -141,7 +142,7 @@ for train_group, test_group in zip(train_groups, test_groups):
         valid_dataloader = DataLoader(valid_dataset, batchsize, shuffle=False, num_workers=4, pin_memory=True)
 
         device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
-        model = Seq2SeqRnn(input_size=trainval.shape[1], seq_len=4000, hidden_size=64, output_size=11, num_layers=2,
+        model = Seq2SeqRnn(input_size=trainval.shape[1], seq_len=400, hidden_size=64, output_size=11, num_layers=2,
                            hidden_layers=[64, 64, 64],
                            bidirectional=True).to(device)
 
@@ -180,7 +181,6 @@ for train_group, test_group in zip(train_groups, test_groups):
     # group_pred = group_pred / np.sum(group_pred, axis=1)[:, None]
 
     pred[test_group] = group_pred
-    group_id = group_id + 1
 
 pred = np.concatenate(pred)
 ss = pd.read_csv("/local/ULIS/data/sample_submission.csv", dtype={'time': str})

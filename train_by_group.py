@@ -18,7 +18,8 @@ expriment_id = 5
 writer = SummaryWriter(logdir=os.path.join("board/", str(expriment_id)))
 
 
-def train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, epoch_n):
+def train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, epoch_n,
+          group_id):
     for epoch in range(epoch_n):
         start_time = time.time()
 
@@ -78,11 +79,11 @@ def train(model, train_dataloader, valid_dataloader, criterion, optimizer, sched
         train_score = f1_score(train_true, train_preds, labels=np.unique(train_true), average='macro')
         val_true = val_true.cpu().detach().numpy()
         val_preds = val_preds.cpu().detach().numpy().argmax(1)
-        val_score = f1_score(val_true, val_preds,labels=np.unique(val_true), average='macro')
+        val_score = f1_score(val_true, val_preds, labels=np.unique(val_true), average='macro')
         print("train_f1: {:0.6f}, valid_f1: {:0.6f}".format(train_score, val_score))
 
-        writer.add_scalars('cv_{}/loss'.format(index), {'train': train_loss, 'val': valid_loss}, epoch)
-        writer.add_scalars('cv_{}/f1_score'.format(index), {'train': train_score, 'val': val_score}, epoch)
+        writer.add_scalars('cv_{}/loss'.format(group_id), {'train': train_loss, 'val': valid_loss}, epoch)
+        writer.add_scalars('cv_{}/f1_score'.format(group_id), {'train': train_score, 'val': val_score}, epoch)
         if early_stopping(valid_loss, model):
             print("Early Stopping...")
             print("Best Val Score: {:0.6f}".format(early_stopping.best_score))
@@ -103,7 +104,7 @@ test_data_n = len(test)
 train_indexs = list(range(train_data_n))
 test_indexs = list(range(test_data_n))
 
-group_id = 1
+group_id = 0
 
 pred = np.zeros([20, 100000])
 for train_group, test_group in zip(train_groups, test_groups):
@@ -152,7 +153,7 @@ for train_group, test_group in zip(train_groups, test_groups):
         criterion = L.FocalLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
         schedular = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=10)
-        train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 150)
+        train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 150, group_id)
 
         model.load_state_dict(
             torch.load(
@@ -179,6 +180,7 @@ for train_group, test_group in zip(train_groups, test_groups):
     group_pred = group_pred / np.sum(group_pred, axis=1)[:, None]
 
     pred[test_group] = test_preds_all
+    group_id = group_id + 1
 ss = pd.read_csv("/local/ULIS/data/sample_submission.csv", dtype={'time': str})
 
 test_pred_frame = pd.DataFrame({'time': ss['time'].astype(str),

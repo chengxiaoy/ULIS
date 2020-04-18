@@ -73,6 +73,7 @@ def train(model, train_dataloader, valid_dataloader, criterion, optimizer, sched
         valid_loss = np.average(valid_losses)
 
         print("train_loss: {:0.6f}, valid_loss: {:0.6f}".format(train_loss, valid_loss))
+        print("train shape {}".format(val_true.shape))
 
         train_score = f1_score(train_true.cpu().detach().numpy(), train_preds.cpu().detach().numpy().argmax(1),
                                labels=list(range(11)), average='macro')
@@ -152,7 +153,7 @@ for train_group, test_group in zip(train_groups, test_groups):
         criterion = L.FocalLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
         schedular = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=10)
-        train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 150)
+        train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 1)
 
         model.load_state_dict(
             torch.load(
@@ -173,6 +174,8 @@ for train_group, test_group in zip(train_groups, test_groups):
     group_pred = np.argmax(test_preds_all, axis=1)
 
     group_pred.reshape(-1, 100000)
+    print(group_pred.shape)
+
     assert group_pred.shape[0] == len(test_group)
     test_preds_all = test_preds_all / np.sum(test_preds_all, axis=1)[:, None]
 
@@ -182,4 +185,3 @@ ss = pd.read_csv("/local/ULIS/data/sample_submission.csv", dtype={'time': str})
 test_pred_frame = pd.DataFrame({'time': ss['time'].astype(str),
                                 'open_channels': np.argmax(test_preds_all, axis=1)})
 test_pred_frame.to_csv("./gru_preds_{}.csv".format(expriment_id), index=False)
-

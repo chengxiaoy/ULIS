@@ -121,9 +121,8 @@ for train_group, test_group in zip(train_groups, test_groups):
     train_group_indexs = np.concatenate(train_group_indexs)
     test_group_indexs = np.concatenate(test_group_indexs)
 
-    test_group = test[test_group_indexs]
-
-    test_dataset = IonDataset(test_group, test_y[test_group_indexs], flip=False, noise_level=0.0, class_split=0.0)
+    test_dataset = IonDataset(test[test_group_indexs], test_y[test_group_indexs], flip=False, noise_level=0.0,
+                              class_split=0.0)
     test_dataloader = DataLoader(test_dataset, 16, shuffle=False, num_workers=8, pin_memory=True)
 
     test_preds_all = np.zeros([len(test_group) * 100000, 11])

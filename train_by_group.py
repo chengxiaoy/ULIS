@@ -177,12 +177,14 @@ for train_group, test_group in zip(train_groups, test_groups):
     print(group_pred.shape)
 
     assert group_pred.shape[0] == len(test_group)
-    group_pred = group_pred / np.sum(group_pred, axis=1)[:, None]
+    # group_pred = group_pred / np.sum(group_pred, axis=1)[:, None]
 
-    pred[test_group] = test_preds_all
+    pred[test_group] = group_pred
     group_id = group_id + 1
+
+pred = np.concatenate(pred)
 ss = pd.read_csv("/local/ULIS/data/sample_submission.csv", dtype={'time': str})
 
 test_pred_frame = pd.DataFrame({'time': ss['time'].astype(str),
-                                'open_channels': test_preds_all})
+                                'open_channels': pred})
 test_pred_frame.to_csv("./gru_preds_{}.csv".format(expriment_id), index=False)

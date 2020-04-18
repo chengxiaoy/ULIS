@@ -14,7 +14,7 @@ from data import new_splits, trainval, trainval_y, test, test_y, test_preds_all
 from tensorboardX import SummaryWriter
 import numpy as np
 
-expriment_id = 6
+expriment_id = 7
 writer = SummaryWriter(logdir=os.path.join("board/", str(expriment_id)))
 
 
@@ -105,8 +105,7 @@ train_indexs = list(range(train_data_n))
 test_indexs = list(range(test_data_n))
 
 pred = np.zeros([20, 100000])
-for group_id in range(1):
-    group_id = 4
+for group_id in range(5):
     train_group = train_groups[group_id]
     test_group = test_groups[group_id]
     train_index, val_index = new_splits[0]
@@ -128,7 +127,7 @@ for group_id in range(1):
 
     test_preds_all = np.zeros([len(test_group) * 100000, 11])
 
-    for index in range(1):
+    for index in range(5):
         train_index, val_index = new_splits[index]
         train_index = np.intersect1d(train_index, train_group_indexs)
         val_index = np.intersect1d(val_index, train_group_indexs)

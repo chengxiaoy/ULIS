@@ -153,7 +153,7 @@ for train_group, test_group in zip(train_groups, test_groups):
         criterion = L.FocalLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
         schedular = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=10)
-        train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 150, group_id)
+        train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 1, group_id)
 
         model.load_state_dict(
             torch.load(

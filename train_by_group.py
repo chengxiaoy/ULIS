@@ -73,7 +73,8 @@ def train(model, train_dataloader, valid_dataloader, criterion, optimizer, sched
         valid_loss = np.average(valid_losses)
 
         print("train_loss: {:0.6f}, valid_loss: {:0.6f}".format(train_loss, valid_loss))
-        print("train shape {}".format(val_true.shape))
+        print("val_true shape {}".format(val_true.shape))
+        print("val_preds shape {}".format(val_preds.shape))
 
         train_score = f1_score(train_true.cpu().detach().numpy(), train_preds.cpu().detach().numpy().argmax(1),
                                labels=list(range(11)), average='macro')
@@ -173,7 +174,7 @@ for train_group, test_group in zip(train_groups, test_groups):
 
     group_pred = np.argmax(test_preds_all, axis=1)
 
-    group_pred.reshape(-1, 100000)
+    group_pred = group_pred.reshape(-1, 100000)
     print(group_pred.shape)
 
     assert group_pred.shape[0] == len(test_group)

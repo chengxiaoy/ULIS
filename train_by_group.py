@@ -19,7 +19,7 @@ writer = SummaryWriter(logdir=os.path.join("board/", str(expriment_id)))
 
 
 def train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, epoch_n,
-          group_id):
+          group_id, index):
     for epoch in range(epoch_n):
         start_time = time.time()
 
@@ -82,8 +82,10 @@ def train(model, train_dataloader, valid_dataloader, criterion, optimizer, sched
         val_score = f1_score(val_true, val_preds, labels=np.unique(val_true), average='macro')
         print("train_f1: {:0.6f}, valid_f1: {:0.6f}".format(train_score, val_score))
 
-        writer.add_scalars('cv_{}/loss'.format(group_id), {'train': train_loss, 'val': valid_loss}, epoch)
-        writer.add_scalars('cv_{}/f1_score'.format(group_id), {'train': train_score, 'val': val_score}, epoch)
+        writer.add_scalars('group_{}/cv_{}/loss'.format(group_id, index), {'train': train_loss, 'val': valid_loss},
+                           epoch)
+        writer.add_scalars('group_{}/cv_{}/f1_score'.format(group_id, index), {'train': train_score, 'val': val_score},
+                           epoch)
         if early_stopping(valid_loss, model):
             print("Early Stopping...")
             print("Best Val Score: {:0.6f}".format(early_stopping.best_score))
@@ -141,7 +143,7 @@ for group_id in range(5):
         valid_dataloader = DataLoader(valid_dataset, batchsize, shuffle=False, num_workers=4, pin_memory=True)
 
         device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
-        model = Seq2SeqRnn(input_size=trainval.shape[1], seq_len=400, hidden_size=64, output_size=11, num_layers=2,
+        model = Seq2SeqRnn(input_size=trainval.shape[1], seq_len=4000, hidden_size=64, output_size=11, num_layers=2,
                            hidden_layers=[64, 64, 64],
                            bidirectional=True).to(device)
 
@@ -153,7 +155,8 @@ for group_id in range(5):
         criterion = L.FocalLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
         schedular = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=10)
-        train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 150, group_id)
+        train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 150, group_id,
+              index)
 
         model.load_state_dict(
             torch.load(
@@ -186,4 +189,4 @@ ss = pd.read_csv("/local/ULIS/data/sample_submission.csv", dtype={'time': str})
 
 test_pred_frame = pd.DataFrame({'time': ss['time'].astype(str),
                                 'open_channels': pred})
-test_pred_frame.to_csv("./gru_preds_{}.csv".format(expriment_id), index=False)
+test_pred_frame.to_csv("./gru_preds_{}.csv".format(expriment_id), float_format='%.4f', index=False)

@@ -14,7 +14,7 @@ from data import new_splits, trainval, trainval_y, test, test_y, test_preds_all
 from tensorboardX import SummaryWriter
 import numpy as np
 
-expriment_id = 8
+expriment_id = 9
 writer = SummaryWriter(logdir=os.path.join("board/", str(expriment_id)))
 
 

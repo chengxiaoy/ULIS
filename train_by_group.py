@@ -14,7 +14,7 @@ from data import new_splits, trainval, trainval_y, test, test_y, test_preds_all
 from tensorboardX import SummaryWriter
 import numpy as np
 
-expriment_id = 17
+expriment_id = 18
 writer = SummaryWriter(logdir=os.path.join("board/", str(expriment_id)))
 
 
@@ -158,9 +158,9 @@ for group_id in range(1):
         valid_dataloader = DataLoader(valid_dataset, batchsize, shuffle=False, num_workers=4, pin_memory=True)
 
         device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
-        model = Seq2SeqRnn(input_size=trainval.shape[1], seq_len=400, hidden_size=64, output_size=11, num_layers=3,
+        model = Seq2SeqRnn(input_size=trainval.shape[1], seq_len=400, hidden_size=64, output_size=11, num_layers=2,
                            hidden_layers=[64, 64, 64],
-                           bidirectional=True, dropout=0.0).to(device)
+                           bidirectional=True, dropout=0.2).to(device)
 
         no_of_epochs = 150
         early_stopping = EarlyStopping(patience=10, is_maximize=False,
@@ -170,7 +170,7 @@ for group_id in range(1):
         criterion = L.FocalLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=0.003)
         schedular = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=10)
-        train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 20, group_id,
+        train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 200, group_id,
               index)
 
         model.load_state_dict(

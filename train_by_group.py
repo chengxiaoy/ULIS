@@ -144,7 +144,7 @@ for group_id in range(1):
         valid_dataloader = DataLoader(valid_dataset, batchsize, shuffle=False, num_workers=4, pin_memory=True)
 
         device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
-        model = Seq2SeqRnn(input_size=trainval.shape[1], seq_len=4000, hidden_size=64, output_size=11, num_layers=2,
+        model = Seq2SeqRnn(input_size=trainval.shape[1], seq_len=400, hidden_size=64, output_size=11, num_layers=2,
                            hidden_layers=[64, 64, 64],
                            bidirectional=True).to(device)
 

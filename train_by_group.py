@@ -14,7 +14,7 @@ from data import new_splits, trainval, trainval_y, test, test_y, test_preds_all
 from tensorboardX import SummaryWriter
 import numpy as np
 
-expriment_id = 14
+expriment_id = 15
 writer = SummaryWriter(logdir=os.path.join("board/", str(expriment_id)))
 
 
@@ -91,7 +91,8 @@ def train(model, train_dataloader, valid_dataloader, criterion, optimizer, sched
                            epoch)
         writer.add_scalars('group_{}/cv_{}/f1_score'.format(group_id, index), {'train': train_score, 'val': val_score},
                            epoch)
-        writer.add_scalars('group_{}/cv_{}/acc'.format(group_id, index), {'train': train_accurancy, 'val': val_accurancy},
+        writer.add_scalars('group_{}/cv_{}/acc'.format(group_id, index),
+                           {'train': train_accurancy, 'val': val_accurancy},
                            epoch)
         if early_stopping(valid_loss, model):
             print("Early Stopping...")
@@ -107,18 +108,10 @@ if not os.path.exists("./models"):
 train_groups = [[0, 1], [2, 6], [3, 7], [5, 8], [4, 9]]
 test_groups = [[0, 3, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], [4], [1, 9], [2, 6], [5, 7]]
 
-train_data_n = len(trainval)
-test_data_n = len(test)
 
-train_indexs = list(range(train_data_n))
-test_indexs = list(range(test_data_n))
-
-pred = np.zeros([20, 100000])
-for group_id in range(1):
-    group_id = 4
+def get_group_index(group_id):
     train_group = train_groups[group_id]
     test_group = test_groups[group_id]
-    train_index, val_index = new_splits[0]
     train_group_indexs = []
     test_group_indexs = []
 
@@ -131,13 +124,27 @@ for group_id in range(1):
     train_group_indexs = np.concatenate(train_group_indexs)
     test_group_indexs = np.concatenate(test_group_indexs)
 
+    return train_group_indexs, test_group_indexs
+
+
+train_data_n = len(trainval)
+test_data_n = len(test)
+
+train_indexs = list(range(train_data_n))
+test_indexs = list(range(test_data_n))
+
+pred = np.zeros([20, 100000])
+for group_id in range(1):
+    group_id = 4
+    train_group_indexs, test_group_indexs = get_group_index(group_id)
     test_dataset = IonDataset(test[test_group_indexs], test_y[test_group_indexs], flip=False, noise_level=0.0,
                               class_split=0.0)
     test_dataloader = DataLoader(test_dataset, 16, shuffle=False, num_workers=8, pin_memory=True)
 
-    test_preds_all = np.zeros([len(test_group) * 100000, 11])
+    test_preds_all = np.zeros([len(test_groups[group_id]) * 100000, 11])
 
-    for index in range(5):
+    for index in range(1):
+        index = 1
         train_index, val_index = new_splits[index]
         train_index = np.intersect1d(train_index, train_group_indexs)
         val_index = np.intersect1d(val_index, train_group_indexs)
@@ -187,10 +194,10 @@ for group_id in range(1):
     group_pred = group_pred.reshape(-1, 100000)
     print(group_pred.shape)
 
-    assert group_pred.shape[0] == len(test_group)
+    assert group_pred.shape[0] == len(test_groups[group_id])
     # group_pred = group_pred / np.sum(group_pred, axis=1)[:, None]
 
-    pred[test_group] = group_pred
+    pred[test_groups[group_id]] = group_pred
 
 pred = np.concatenate(pred)
 ss = pd.read_csv("/local/ULIS/data/sample_submission.csv", dtype={'time': str})

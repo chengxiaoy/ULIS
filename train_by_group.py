@@ -14,7 +14,7 @@ from data import new_splits, trainval, trainval_y, test, test_y, test_preds_all
 from tensorboardX import SummaryWriter
 import numpy as np
 
-expriment_id = 9
+expriment_id = 10
 writer = SummaryWriter(logdir=os.path.join("board/", str(expriment_id)))
 
 
@@ -146,7 +146,7 @@ for group_id in range(1):
         device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
         model = Seq2SeqRnn(input_size=trainval.shape[1], seq_len=400, hidden_size=64, output_size=11, num_layers=2,
                            hidden_layers=[64, 64, 64],
-                           bidirectional=True).to(device)
+                           bidirectional=True,dropout=0.2).to(device)
 
         no_of_epochs = 150
         early_stopping = EarlyStopping(patience=10, is_maximize=False,

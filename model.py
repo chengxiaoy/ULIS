@@ -14,7 +14,7 @@ class Seq2SeqRnn(nn.Module):
         self.output_size = output_size
 
         self.rnn = nn.GRU(input_size=input_size, hidden_size=hidden_size, num_layers=num_layers,
-                          bidirectional=bidirectional, batch_first=True, dropout=0.3)
+                          bidirectional=bidirectional, batch_first=True, dropout=dropout)
         # Input Layer
         if hidden_layers and len(hidden_layers):
             first_layer = nn.Linear(hidden_size * 2 if bidirectional else hidden_size, hidden_layers[0])

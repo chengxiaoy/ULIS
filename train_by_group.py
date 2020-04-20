@@ -14,7 +14,7 @@ from data import new_splits, trainval, trainval_y, test, test_y, test_preds_all
 from tensorboardX import SummaryWriter
 import numpy as np
 
-expriment_id = 13
+expriment_id = 14
 writer = SummaryWriter(logdir=os.path.join("board/", str(expriment_id)))
 
 
@@ -77,14 +77,21 @@ def train(model, train_dataloader, valid_dataloader, criterion, optimizer, sched
         train_true = train_true.cpu().detach().numpy()
         train_preds = train_preds.cpu().detach().numpy().argmax(1)
         train_score = f1_score(train_true, train_preds, labels=np.unique(train_true), average='macro')
+        train_accurancy = np.sum(train_true == train_preds) / len(train_true)
+
         val_true = val_true.cpu().detach().numpy()
         val_preds = val_preds.cpu().detach().numpy().argmax(1)
         val_score = f1_score(val_true, val_preds, labels=np.unique(val_true), average='macro')
+        val_accurancy = np.sum(val_true == val_preds) / len(val_true)
+
         print("train_f1: {:0.6f}, valid_f1: {:0.6f}".format(train_score, val_score))
+        print("train_acc: {:0.6f}, valid_acc: {:0.6f}".format(train_accurancy, val_accurancy))
 
         writer.add_scalars('group_{}/cv_{}/loss'.format(group_id, index), {'train': train_loss, 'val': valid_loss},
                            epoch)
         writer.add_scalars('group_{}/cv_{}/f1_score'.format(group_id, index), {'train': train_score, 'val': val_score},
+                           epoch)
+        writer.add_scalars('group_{}/cv_{}/acc'.format(group_id, index), {'train': train_accurancy, 'val': val_accurancy},
                            epoch)
         if early_stopping(valid_loss, model):
             print("Early Stopping...")
@@ -146,7 +153,7 @@ for group_id in range(1):
         device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
         model = Seq2SeqRnn(input_size=trainval.shape[1], seq_len=400, hidden_size=64, output_size=11, num_layers=2,
                            hidden_layers=[64, 64, 64],
-                           bidirectional=True,dropout=0.0).to(device)
+                           bidirectional=True, dropout=0.0).to(device)
 
         no_of_epochs = 150
         early_stopping = EarlyStopping(patience=10, is_maximize=False,

@@ -14,7 +14,7 @@ from data import new_splits, trainval, trainval_y, test, test_y, test_preds_all
 from tensorboardX import SummaryWriter
 import numpy as np
 
-expriment_id = 7
+expriment_id = 8
 writer = SummaryWriter(logdir=os.path.join("board/", str(expriment_id)))
 
 
@@ -107,7 +107,8 @@ train_indexs = list(range(train_data_n))
 test_indexs = list(range(test_data_n))
 
 pred = np.zeros([20, 100000])
-for group_id in range(5):
+for group_id in range(1):
+    group_id = 4
     train_group = train_groups[group_id]
     test_group = test_groups[group_id]
     train_index, val_index = new_splits[0]
@@ -129,7 +130,7 @@ for group_id in range(5):
 
     test_preds_all = np.zeros([len(test_group) * 100000, 11])
 
-    for index in range(5):
+    for index in range(1):
         train_index, val_index = new_splits[index]
         train_index = np.intersect1d(train_index, train_group_indexs)
         val_index = np.intersect1d(val_index, train_group_indexs)
@@ -153,9 +154,9 @@ for group_id in range(5):
                                            index,
                                            group_id, expriment_id))
         criterion = L.FocalLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.003)
         schedular = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=10)
-        train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 150, group_id,
+        train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 200, group_id,
               index)
 
         model.load_state_dict(
@@ -188,5 +189,5 @@ pred = np.concatenate(pred)
 ss = pd.read_csv("/local/ULIS/data/sample_submission.csv", dtype={'time': str})
 
 test_pred_frame = pd.DataFrame({'time': ss['time'].astype(str),
-                                'open_channels': pred})
+                                'open_channels': pred.astype(np.int)})
 test_pred_frame.to_csv("./gru_preds_{}.csv".format(expriment_id), float_format='%.4f', index=False)

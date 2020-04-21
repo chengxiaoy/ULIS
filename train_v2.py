@@ -13,7 +13,7 @@ from sklearn.metrics import f1_score
 from data import new_splits, trainval, trainval_y, test, test_y, test_preds_all
 from tensorboardX import SummaryWriter
 
-expriment_id = 3
+expriment_id = 0
 writer = SummaryWriter(logdir=os.path.join("board/", str(expriment_id)))
 
 if not os.path.exists("./models"):
@@ -152,4 +152,4 @@ ss = pd.read_csv("/local/ULIS/data/sample_submission.csv", dtype={'time': str})
 test_preds_all = test_preds_all / np.sum(test_preds_all, axis=1)[:, None]
 test_pred_frame = pd.DataFrame({'time': ss['time'].astype(str),
                                 'open_channels': np.argmax(test_preds_all, axis=1)})
-test_pred_frame.to_csv("./gru_preds_{}.csv".format(expriment_id), index=False)
+test_pred_frame.to_csv("./gru_preds_{}.csv".format(expriment_id), float_format='%.4f',index=False)

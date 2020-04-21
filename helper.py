@@ -3,13 +3,21 @@ import pandas as pd
 import numpy as np
 
 
-def load_data():
+def load_data(kalman_filter=False):
     if torch.cuda.is_available():
-        train = pd.read_csv('/local/ULIS/data/train_clean.csv')
-        test = pd.read_csv('/local/ULIS/data/test_clean.csv')
+        if not kalman_filter:
+            train = pd.read_csv('/local/ULIS/data/train_clean.csv')
+            test = pd.read_csv('/local/ULIS/data/test_clean.csv')
+        else:
+            train = pd.read_csv('/local/ULIS/data/train_kalman.csv')
+            test = pd.read_csv('/local/ULIS/data/test_kalman.csv')
     else:
-        train = pd.read_csv('./data/train_clean.csv')
-        test = pd.read_csv('./data/test_clean.csv')
+        if not kalman_filter:
+            train = pd.read_csv('./data/train_clean.csv')
+            test = pd.read_csv('./data/test_clean.csv')
+        else:
+            train = pd.read_csv('./data/train_kalman.csv')
+            test = pd.read_csv('./data/test_kalman.csv')
 
     train_signals = [None] * 10
     train_states = [None] * 10

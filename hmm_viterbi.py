@@ -6,6 +6,7 @@ from pomegranate import NormalDistribution
 from sklearn.metrics import f1_score, accuracy_score
 import helper
 import time
+from pykalman import KalmanFilter
 
 
 def viterbi(p_trans, p_signal, p_in, signal):
@@ -104,8 +105,23 @@ def calc_markov_p_signal_2(states, signals):
     return emiting_pdf
 
 
-# emiting_pdf = calc_markov_p_signal_2(true_state, signal)
-# p_signal, signal_bins = calc_markov_p_signal(true_state, signal)
+# Function from https://www.kaggle.com/aussie84/train-fare-trends-using-kalman-filter-1d
+def Kalman1D(observations, damping=1):
+    # To return the smoothed time series data
+    observation_covariance = damping
+    initial_value_guess = observations[0]
+    transition_matrix = 1
+    transition_covariance = 0.1
+    initial_value_guess
+    kf = KalmanFilter(
+        initial_state_mean=initial_value_guess,
+        initial_state_covariance=observation_covariance,
+        observation_covariance=observation_covariance,
+        transition_covariance=transition_covariance,
+        transition_matrices=transition_matrix
+    )
+    pred_state, state_cov = kf.smooth(observations)
+    return pred_state
 
 
 def digitize_signal(signal, signal_bins):
@@ -114,23 +130,19 @@ def digitize_signal(signal, signal_bins):
     return signal_dig
 
 
-# signal_dig = digitize_signal(signal, signal_bins)
-# print("Signal bin values:", signal_dig)
-# p_in = np.ones(len(p_trans)) / len(p_trans)
-# print("Initial probability p_in =", p_in)
-# viterbi_state = viterbi(p_trans, p_signal, p_in, signal_dig)
-# print("State sequence as decodinged by Viterbi algorithm :", viterbi_state)
-
-
-
 class ViterbiModel():
-    def __init__(self):
+    def __init__(self, kalman_filter=False):
         self.p_trans = None
         self.p_emit = None
         self.p_in = None
         self.signal_bins = None
+        self.kalman_filter = kalman_filter
 
     def learning(self, states, signals):
+        if self.kalman_filter:
+            observation_covariance = .0015
+            signals = Kalman1D(signals, observation_covariance).reshape(-1)
+
         self.p_trans = calc_markov_p_trans(states)
         # self.p_emit = calc_markov_p_signal_2(states, signals)
         self.p_emit, self.signal_bins = calc_markov_p_signal(states, signals)
@@ -138,6 +150,9 @@ class ViterbiModel():
         return self
 
     def decoding(self, signals):
+        if self.kalman_filter:
+            observation_covariance = .0015
+            signals = Kalman1D(signals, observation_covariance).reshape(-1)
         signal_dig = digitize_signal(signals, self.signal_bins)
         # return viterbi_2(self.p_trans, self.p_emit, self.p_in, signals)
         return viterbi(self.p_trans, self.p_emit, self.p_in, signal_dig)
@@ -145,7 +160,7 @@ class ViterbiModel():
 
 if __name__ == '__main__':
 
-    train_states, train_signals, train_groups, test_signals, test_groups = helper.load_data()
+    train_states, train_signals, train_groups, test_signals, test_groups = helper.load_data(kalman_filter=False)
     test_y_pred = [None] * np.sum([len(x) for x in test_groups])
     for train_group, test_group in zip(train_groups, test_groups):
         since = time.time()
@@ -154,19 +169,15 @@ if __name__ == '__main__':
 
         signal_train = np.concatenate(train_signals[train_group])
         true_state_train = np.concatenate(train_states[train_group])
-        model = ViterbiModel()
+        model = ViterbiModel(kalman_filter=True)
         model.learning(true_state_train, signal_train)
 
         for test_grp in test_group:
             test_y_pred[test_grp] = model.decoding(test_signals[test_grp])
         print("cost {} s".format(time.time() - since))
-        print("Accuracy =", accuracy_score(y_pred=viterbi_state, y_true=true_state))
-        print("F1 macro =", f1_score(y_pred=viterbi_state, y_true=true_state, average='macro'))
 
     test_y_pred = np.concatenate(test_y_pred)
 
     df_subm = pd.read_csv("data/sample_submission.csv")
     df_subm['open_channels'] = test_y_pred
     df_subm.to_csv("viterbi_new.csv", float_format='%.4f', index=False)
-
-

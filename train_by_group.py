@@ -1,6 +1,8 @@
 import os
 from data import IonDataset
 from torch.utils.data import DataLoader, Dataset
+from data import get_data, normalize, run_feat_engineering, feature_selection, batching, IronDataset, EarlyStopping
+from sklearn.model_selection import GroupKFold
 import numpy as np
 from model import Seq2SeqRnn
 import torch
@@ -10,16 +12,67 @@ import time
 import torch.nn.functional as F
 import pandas as pd
 from sklearn.metrics import f1_score
-from data import new_splits, trainval, trainval_y, test, test_y, test_preds_all
 from tensorboardX import SummaryWriter
 import numpy as np
+from data import get_data
+from attrdict import AttrDict
+from model import getModel
 
-expriment_id = 18
-writer = SummaryWriter(logdir=os.path.join("board/", str(expriment_id)))
+EPOCHS = 90  # 150
+NNBATCHSIZE = 32
+GROUP_BATCH_SIZE = 4000
+SEED = 123
+LR = 0.001
+SPLITS = 5
+model_name = 'wave_net'
+gpu_id = 0
+device = torch.device("cuda:" + str(gpu_id) if torch.cuda.is_available() else "cpu")
+data_type = "raw"  # raw clean kalman_clean
+data_fe = "shifted_proba"  # none "shifted"
+data_group = False
+outdir = 'wavenet_models'
+flip = False
+noise = False
+expriment_id = 0
+config = AttrDict({'EPOCHS': EPOCHS, 'NNBATCHSIZE': NNBATCHSIZE, 'GROUP_BATCH_SIZE': GROUP_BATCH_SIZE, 'SEED': SEED,
+                   'LR': LR, 'SPLITS': SPLITS, 'model_name': model_name, 'device': device, 'outdir': outdir,
+                   'expriment_id': expriment_id, 'data_type': data_type, 'data_fe': data_fe, 'noise': noise,
+                   'flip': flip})
+
+# read data and batching
+train, test, sub = get_data(config)
+features = ['signal']
+train = batching(train, batch_size=config.GROUP_BATCH_SIZE)
+test = batching(test, batch_size=config.GROUP_BATCH_SIZE)
+
+# data feature engineering
+if data_fe is not None and data_fe == 'shifted_proba':
+    train, test = normalize(train, test)
+    train = run_feat_engineering(train)
+    test = run_feat_engineering(test)
+    train, test, features = feature_selection(train, test)
+
+# cross valid
+target = ['open_channels']
+group = train['group']
+kf = GroupKFold(n_splits=config.SPLITS)
+splits = [x for x in kf.split(train, train[target], group)]
+new_splits = []
+for sp in splits:
+    new_split = []
+    new_split.append(np.unique(group[sp[0]]))
+    new_split.append(np.unique(group[sp[1]]))
+    new_split.append(sp[1])
+    new_splits.append(new_split)
+
+target_cols = ['open_channels']
+train_tr = np.array(list(train.groupby('group').apply(lambda x: x[target_cols].values))).astype(np.float32)
+train = np.array(list(train.groupby('group').apply(lambda x: x[features].values)))
+test = np.array(list(test.groupby('group').apply(lambda x: x[features].values)))
 
 
-def train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, epoch_n,
-          group_id, index):
+def train_(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, epoch_n,
+           group_id, index, writer):
     for epoch in range(epoch_n):
         start_time = time.time()
 
@@ -35,7 +88,7 @@ def train(model, train_dataloader, valid_dataloader, criterion, optimizer, sched
             y = y.to(device)
 
             optimizer.zero_grad()
-            predictions = model(x[:, :trainval.shape[1], :])
+            predictions = model(x)
 
             predictions_ = predictions.view(-1, predictions.shape[-1])
             y_ = y.view(-1)
@@ -59,7 +112,7 @@ def train(model, train_dataloader, valid_dataloader, criterion, optimizer, sched
                 x = x.to(device)
                 y = y.to(device)
 
-                predictions = model(x[:, :trainval.shape[1], :])
+                predictions = model(x)
                 predictions_ = predictions.view(-1, predictions.shape[-1])
                 y_ = y.view(-1)
 
@@ -102,24 +155,23 @@ def train(model, train_dataloader, valid_dataloader, criterion, optimizer, sched
         print("--- %s seconds ---" % (time.time() - start_time))
 
 
-if not os.path.exists("./models"):
-    os.makedirs("./models")
-
 train_groups = [[0, 1], [2, 6], [3, 7], [5, 8], [4, 9]]
 test_groups = [[0, 3, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], [4], [1, 9], [2, 6], [5, 7]]
 
 
-def get_group_index(group_id):
+def get_group_index(group_id, train_length, test_length):
+    train_indexs = list(range(train_length))
+    test_indexs = list(range(test_length))
     train_group = train_groups[group_id]
     test_group = test_groups[group_id]
     train_group_indexs = []
     test_group_indexs = []
 
     for grp in train_group:
-        train_group_indexs.append(train_indexs[grp * (train_data_n // 10):(grp + 1) * (train_data_n // 10)])
+        train_group_indexs.append(train_indexs[grp * (train_length // 10):(grp + 1) * (train_length // 10)])
 
     for grp in test_group:
-        test_group_indexs.append(test_indexs[grp * (test_data_n // 20):(grp + 1) * (test_data_n // 20)])
+        test_group_indexs.append(test_indexs[grp * (test_length // 20):(grp + 1) * (test_length // 20)])
 
     train_group_indexs = np.concatenate(train_group_indexs)
     test_group_indexs = np.concatenate(test_group_indexs)
@@ -127,19 +179,16 @@ def get_group_index(group_id):
     return train_group_indexs, test_group_indexs
 
 
-train_data_n = len(trainval)
-test_data_n = len(test)
-
-train_indexs = list(range(train_data_n))
-test_indexs = list(range(test_data_n))
+writer = SummaryWriter(logdir=os.path.join("board/", str(config.expriment_id)))
 
 pred = np.zeros([20, 100000])
 for group_id in range(1):
-    group_id = 4
-    train_group_indexs, test_group_indexs = get_group_index(group_id)
+    test_y = np.zeros([int(2000000 / config.GROUP_BATCH_SIZE), config.GROUP_BATCH_SIZE, 1])
+
+    train_group_indexs, test_group_indexs = get_group_index(group_id, len(train), len(test))
     test_dataset = IonDataset(test[test_group_indexs], test_y[test_group_indexs], flip=False, noise_level=0.0,
                               class_split=0.0)
-    test_dataloader = DataLoader(test_dataset, 16, shuffle=False, num_workers=8, pin_memory=True)
+    test_dataloader = DataLoader(test_dataset, config.NNBATCHSIZE, shuffle=False, num_workers=8, pin_memory=True)
 
     test_preds_all = np.zeros([len(test_groups[group_id]) * 100000, 11])
 
@@ -150,19 +199,14 @@ for group_id in range(1):
         val_index = np.intersect1d(val_index, train_group_indexs)
 
         batchsize = 16
-        train_dataset = IonDataset(trainval[train_index], trainval_y[train_index], flip=False, noise_level=0.0,
+        train_dataset = IonDataset(train[train_index], train_tr[train_index], flip=False, noise_level=0.0,
                                    class_split=0.0)
         train_dataloader = DataLoader(train_dataset, batchsize, shuffle=True, num_workers=8, pin_memory=True)
 
-        valid_dataset = IonDataset(trainval[val_index], trainval_y[val_index], flip=False)
+        valid_dataset = IonDataset(train[val_index], train_tr[val_index], flip=False)
         valid_dataloader = DataLoader(valid_dataset, batchsize, shuffle=False, num_workers=4, pin_memory=True)
+        model = getModel(config)
 
-        device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
-        model = Seq2SeqRnn(input_size=trainval.shape[1], seq_len=400, hidden_size=64, output_size=11, num_layers=2,
-                           hidden_layers=[64, 64, 64],
-                           bidirectional=True, dropout=0.2).to(device)
-
-        no_of_epochs = 150
         early_stopping = EarlyStopping(patience=10, is_maximize=False,
                                        checkpoint_path="./models/gru_clean_checkpoint_fold_{}_group_{}_exp_{}.pt".format(
                                            index,
@@ -170,8 +214,8 @@ for group_id in range(1):
         criterion = L.FocalLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=0.003)
         schedular = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=10)
-        train(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 200, group_id,
-              index)
+        train_(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 200, group_id,
+              index, writer)
 
         model.load_state_dict(
             torch.load(
@@ -182,7 +226,7 @@ for group_id in range(1):
                 x = x.to(device)
                 y = y.to(device)
 
-                predictions = model(x[:, :trainval.shape[1], :])
+                predictions = model(x)
                 predictions_ = predictions.view(-1, predictions.shape[-1])
 
                 pred_list.append(F.softmax(predictions_, dim=1).cpu().numpy())

@@ -70,9 +70,9 @@ test = np.array(list(test.groupby('group').apply(lambda x: x[features].values)))
 
 
 # build dataloader
-test_y = np.zeros([int(2000000 / GROUP_BATCH_SIZE), GROUP_BATCH_SIZE, 1])
+test_y = np.zeros([int(2000000 / config.GROUP_BATCH_SIZE), config.GROUP_BATCH_SIZE, 1])
 test_dataset = IronDataset(test, test_y, flip=False)
-test_dataloader = DataLoader(test_dataset, NNBATCHSIZE, shuffle=False)
+test_dataloader = DataLoader(test_dataset, config.NNBATCHSIZE, shuffle=False)
 test_preds_all = np.zeros((2000000, 11))
 
 writer = SummaryWriter(logdir=os.path.join("board/", str(config.expriment_id)))

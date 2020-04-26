@@ -1,97 +1,81 @@
-import os
-
 import pandas as pd
 import numpy as np
-import json
-
-pd.options.display.max_rows = 1000
-pd.options.display.max_columns = 1000
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score, f1_score
-import time
-from torch.utils.data import Dataset, DataLoader
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from functools import partial
-from sklearn.model_selection import KFold
-import gc
-from tqdm import tqdm
-from itertools import groupby, accumulate
-from random import shuffle
-from sklearn.model_selection import GroupKFold, GroupShuffleSplit, LeaveOneGroupOut
-from sklearn.preprocessing import MinMaxScaler
-from pytorch_toolbelt import losses as L
-import pandas as pd
-import numpy as np
-
-if torch.cuda.is_available():
-    train = pd.read_csv('/local/ULIS/data/train_clean.csv')
-    test = pd.read_csv('/local/ULIS/data/test_clean.csv')
-else:
-    train = pd.read_csv('./data/train_clean.csv')
-    test = pd.read_csv('./data/test_clean.csv')
-
-train['filter'] = 0
-test['filter'] = 2
-ts1 = pd.concat([train, test], axis=0, sort=False).reset_index(drop=True)
-
-ts1['time2'] = pd.cut(ts1['time'], bins=np.linspace(0.0000, 700., num=14 + 1), labels=list(range(14)),
-                      include_lowest=True).astype(int)
-ts1['time2'] = ts1.groupby('time2')['time'].rank() / 500000.
-
-np.random.seed(321)
-ts1['group'] = pd.cut(ts1['time'], bins=np.linspace(0.0000, 700., num=14 * 125 + 1), labels=list(range(14 * 125)),
-                      include_lowest=True).astype(int)
-np.random.seed(321)
-
-y = ts1.loc[ts1['filter'] == 0, 'open_channels']
-group = ts1.loc[ts1['filter'] == 0, 'group']
-X = ts1.loc[ts1['filter'] == 0, 'signal']
-
-np.random.seed(321)
-skf = GroupKFold(n_splits=5)
-splits = [x for x in skf.split(X, y, group)]
-
-use_cols = [col for col in ts1.columns if col not in ['index', 'filter', 'group', 'open_channels', 'time', 'time2']]
-
-# Create numpy array of inputs
-for col in use_cols:
-    col_mean = ts1[col].mean()
-    ts1[col] = ts1[col].fillna(col_mean)
-
-val_preds_all = np.zeros((ts1[ts1['filter'] == 0].shape[0], 11))
-test_preds_all = np.zeros((ts1[ts1['filter'] == 2].shape[0], 11))
-
-groups = ts1.loc[ts1['filter'] == 0, 'group']
-times = ts1.loc[ts1['filter'] == 0, 'time']
-new_splits = []
-for sp in splits:
-    new_split = []
-    new_split.append(np.unique(groups[sp[0]]))
-    new_split.append(np.unique(groups[sp[1]]))
-    new_splits.append(new_split)
-
-trainval = np.array(list(ts1[ts1['filter'] == 0].groupby('group').apply(lambda x: x[use_cols].values)))
-test = np.array(list(ts1[ts1['filter'] == 2].groupby('group').apply(lambda x: x[use_cols].values)))
-trainval_y = np.array(list(ts1[ts1['filter'] == 0].groupby('group').apply(lambda x: x[['open_channels']].values)))
-
-trainval = trainval.transpose((0, 2, 1))
-test = test.transpose((0, 2, 1))
-
-trainval_y = trainval_y.reshape(trainval_y.shape[:2])
-test_y = np.zeros((test.shape[0], trainval_y.shape[1]))
-
-trainval = torch.Tensor(trainval)
-test = torch.Tensor(test)
+from torch.utils.data import Dataset
 
 
-class IonDataset(Dataset):
-    """Car dataset."""
+def get_data(config):
+    train = None
+    test = None
+    if config.data_type == 'raw':
+        train = pd.read_csv('data/train.csv')
+        test = pd.read_csv('data/test.csv')
 
-    def __init__(self, data, labels, training=True, transform=None, flip=0.5, noise_level=0, class_split=0.0):
+    elif config.data_type == 'clean':
+        train = pd.read_csv('data/train_clean.csv')
+        test = pd.read_csv('data/test_clean.csv')
+
+    elif config.data_type == 'kalman_clean':
+        train = pd.read_csv('data/train_kalman_clean.csv')
+        test = pd.read_csv('data/test_kalman_test.csv')
+
+    if config.data_fe == 'shifted_proba':
+        Y_train_proba = np.load("data/Y_train_proba.npy")
+        Y_test_proba = np.load("data/Y_test_proba.npy")
+
+        for i in range(11):
+            train[f"proba_{i}"] = Y_train_proba[:, i]
+            test[f"proba_{i}"] = Y_test_proba[:, i]
+
+    sub = pd.read_csv('data/sample_submission.csv')
+    return train, test, sub
+
+
+def normalize(train, test):
+    train_input_mean = train.signal.mean()
+    train_input_sigma = train.signal.std()
+    train['signal'] = (train.signal - train_input_mean) / train_input_sigma
+    test['signal'] = (test.signal - train_input_mean) / train_input_sigma
+    return train, test
+
+
+def batching(df, batch_size):
+    # print(df)
+    df['group'] = df.groupby(df.index // batch_size, sort=False)['signal'].agg(['ngroup']).values
+    df['group'] = df['group'].astype(np.uint16)
+    return df
+
+
+def lag_with_pct_change(df, windows):
+    for window in windows:
+        df['signal_shift_pos_' + str(window)] = df.groupby('group')['signal'].shift(window).fillna(0)
+        df['signal_shift_neg_' + str(window)] = df.groupby('group')['signal'].shift(-1 * window).fillna(0)
+    return df
+
+
+def run_feat_engineering(df):
+    # create batches
+    # create leads and lags (1, 2, 3 making them 6 features)
+    df = lag_with_pct_change(df, [1, 2, 3])
+    # create signal ** 2 (this is the new feature)
+    df['signal_2'] = df['signal'] ** 2
+    return df
+
+
+def feature_selection(train, test):
+    features = [col for col in train.columns if col not in ['index', 'group', 'open_channels', 'time']]
+    train = train.replace([np.inf, -np.inf], np.nan)
+    test = test.replace([np.inf, -np.inf], np.nan)
+    for feature in features:
+        feature_mean = pd.concat([train[feature], test[feature]], axis=0).mean()
+        train[feature] = train[feature].fillna(feature_mean)
+        test[feature] = test[feature].fillna(feature_mean)
+    return train, test, features
+
+
+class IronDataset(Dataset):
+    def __init__(self, data, labels, training=True, transform=None, seq_len=5000, flip=0.5, noise_level=0,
+                 class_split=0.0):
         self.data = data
         self.labels = labels
         self.transform = transform
@@ -99,6 +83,7 @@ class IonDataset(Dataset):
         self.flip = flip
         self.noise_level = noise_level
         self.class_split = class_split
+        self.seq_len = seq_len
 
     def __len__(self):
         return len(self.data)
@@ -109,12 +94,27 @@ class IonDataset(Dataset):
 
         data = self.data[idx]
         labels = self.labels[idx]
-        if np.random.rand() < self.class_split:
-            data, labels = class_split(data, labels)
-        if np.random.rand() < self.noise_level:
-            data = data * torch.FloatTensor(10000).uniform_(1 - self.noise_level, 1 + self.noise_level)
-        if np.random.rand() < self.flip:
-            data = torch.flip(data, dims=[1])
-            labels = np.flip(labels, axis=0).copy().astype(int)
 
-        return [data, labels.astype(int)]
+        return [data.astype(np.float32), labels.astype(int)]
+
+
+class EarlyStopping:
+    def __init__(self, patience=7, delta=0, checkpoint_path='checkpoint.pt', is_maximize=True):
+        self.patience, self.delta, self.checkpoint_path = patience, delta, checkpoint_path
+        self.counter, self.best_score = 0, None
+        self.is_maximize = is_maximize
+
+    def load_best_weights(self, model):
+        model.load_state_dict(torch.load(self.checkpoint_path))
+
+    def __call__(self, score, model):
+        if self.best_score is None or \
+                (score > self.best_score + self.delta if self.is_maximize else score < self.best_score - self.delta):
+            torch.save(model.state_dict(), self.checkpoint_path)
+            self.best_score, self.counter = score, 0
+            return 1
+        else:
+            self.counter += 1
+            if self.counter >= self.patience:
+                return 2
+        return 0

@@ -33,7 +33,7 @@ noise = False
 expriment_id = 0
 config = AttrDict({'EPOCHS': EPOCHS, 'NNBATCHSIZE': NNBATCHSIZE, 'GROUP_BATCH_SIZE': GROUP_BATCH_SIZE, 'SEED': SEED,
                    'LR': LR, 'SPLITS': SPLITS, 'model_name': model_name, 'device': device, 'outdir': outdir,
-                   'expriment_id': expriment_id})
+                   'expriment_id': expriment_id, 'data_type': data_type, 'data_fe': data_fe,'noise':noise,'flip':flip})
 
 # read data and batching
 train, test, sub = get_data(config)

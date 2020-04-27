@@ -201,7 +201,7 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
         res = early_stopping(val_score, model)
 
         # 再 切换回来
-        optimizer.swap_swa_sgd()
+        # optimizer.swap_swa_sgd()
         # print('fres:', res)
         if res == 2:
             print("Early Stopping")

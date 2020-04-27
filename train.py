@@ -44,7 +44,7 @@ def seed_everything(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
 
 
-seed_everything(config.seed)
+seed_everything(config.SEED)
 
 # read data and batching
 train, test, sub = get_data(config)

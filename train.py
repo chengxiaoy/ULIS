@@ -145,7 +145,7 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
         model.eval()  # prep model for evaluation
         # schedular.step(loss)
 
-        optimizer.update_swa()
+        # optimizer.update_swa()
         optimizer.swap_swa_sgd()
         val_preds, val_true = torch.Tensor([]).cuda(), torch.LongTensor([]).cuda()
         print('EVALUATION')

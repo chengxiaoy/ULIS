@@ -32,7 +32,7 @@ data_group = False
 outdir = 'wavenet_models'
 flip = False
 noise = False
-expriment_id = 1
+expriment_id = 2
 config = AttrDict({'EPOCHS': EPOCHS, 'NNBATCHSIZE': NNBATCHSIZE, 'GROUP_BATCH_SIZE': GROUP_BATCH_SIZE, 'SEED': SEED,
                    'LR': LR, 'SPLITS': SPLITS, 'model_name': model_name, 'device': device, 'outdir': outdir,
                    'expriment_id': expriment_id, 'data_type': data_type, 'data_fe': data_fe, 'noise': noise,
@@ -181,7 +181,8 @@ def get_group_index(group_id, train_length, test_length):
 writer = SummaryWriter(logdir=os.path.join("board/", str(config.expriment_id)))
 
 pred = np.zeros([20, 100000])
-for group_id in range(5):
+for group_id in range(1):
+    group_id = 4
     test_y = np.zeros([int(2000000 / config.GROUP_BATCH_SIZE), config.GROUP_BATCH_SIZE, 1])
 
     train_group_indexs, test_group_indexs = get_group_index(group_id, len(train), len(test))
@@ -203,14 +204,14 @@ for group_id in range(5):
         valid_dataloader = DataLoader(valid_dataset, batchsize, shuffle=False, num_workers=4, pin_memory=True)
         model = getModel(config)
 
-        early_stopping = EarlyStopping(patience=10, is_maximize=False,
+        early_stopping = EarlyStopping(patience=20, is_maximize=False,
                                        checkpoint_path="./models/gru_clean_checkpoint_fold_{}_group_{}_exp_{}.pt".format(
                                            index,
                                            group_id, expriment_id))
         criterion = L.FocalLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.003)
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
         schedular = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=10)
-        train_(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 200, group_id,
+        train_(model, train_dataloader, valid_dataloader, criterion, optimizer, schedular, early_stopping, 100, group_id,
               index, writer)
 
         model.load_state_dict(

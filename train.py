@@ -22,7 +22,7 @@ SEED = 123
 LR = 0.001
 SPLITS = 5
 model_name = 'wave_net'
-gpu_id = 0
+gpu_id = 3
 device = torch.device("cuda:" + str(gpu_id) if torch.cuda.is_available() else "cpu")
 data_type = "kalman_clean"  # raw clean kalman_clean
 data_fe = "shifted_proba"  # none "shifted"
@@ -100,8 +100,9 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
     weight = None  # cal_weights()
     criterion = nn.CrossEntropyLoss(weight=weight)
     optimizer = torch.optim.Adam(model.parameters(), lr=config.LR)
-    optimizer = torchcontrib.optim.SWA(optimizer, swa_start=10, swa_freq=2, swa_lr=0.0011)
-    schedular = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience=2, factor=0.2)
+    # optimizer = torchcontrib.optim.SWA(optimizer, swa_start=10, swa_freq=2, swa_lr=0.0011)
+    optimizer = torchcontrib.optim.SWA(optimizer)
+    schedular = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience=3, factor=0.2)
 
     avg_train_losses, avg_valid_losses = [], []
 
@@ -142,11 +143,13 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
             train_true = torch.cat([train_true, y_], 0)
             train_preds = torch.cat([train_preds, predictions_], 0)
 
-        model.eval()  # prep model for evaluation
         # schedular.step(loss)
-
-        # optimizer.update_swa()
+        # 更行swa
+        optimizer.update_swa()
+        # 切换成swa 进行valid 和 save
         optimizer.swap_swa_sgd()
+        model.eval()  # prep model for evaluation
+
         val_preds, val_true = torch.Tensor([]).cuda(), torch.LongTensor([]).cuda()
         print('EVALUATION')
         with torch.no_grad():
@@ -183,6 +186,9 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
         writer.add_scalars('cv_{}/f1_score'.format(index), {'train': train_score, 'val': val_score}, epoch)
 
         res = early_stopping(val_score, model)
+
+        # 再 切换回来
+        optimizer.swap_swa_sgd()
         # print('fres:', res)
         if res == 2:
             print("Early Stopping")

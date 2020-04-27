@@ -16,8 +16,8 @@ def get_data(config):
         test = pd.read_csv('data/test_clean.csv')
 
     elif config.data_type == 'kalman_clean':
-        train = pd.read_csv('data/train_kalman_clean.csv')
-        test = pd.read_csv('data/test_kalman_test.csv')
+        train = pd.read_csv('data/train_clean_kalman.csv')
+        test = pd.read_csv('data/test_clean_kalman.csv')
 
     if config.data_fe == 'shifted_proba':
         Y_train_proba = np.load("data/Y_train_proba.npy")

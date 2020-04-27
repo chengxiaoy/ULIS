@@ -191,7 +191,7 @@ for group_id in range(5):
     test_preds_all = np.zeros([len(test_groups[group_id]) * 100000, 11])
 
     for index in range(5):
-        train_index, val_index = new_splits[index]
+        train_index, val_index,_ = new_splits[index]
         train_index = np.intersect1d(train_index, train_group_indexs)
         val_index = np.intersect1d(val_index, train_group_indexs)
 

@@ -111,8 +111,8 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
     weight = None  # cal_weights()
     criterion = nn.CrossEntropyLoss(weight=weight)
     optimizer = torch.optim.Adam(model.parameters(), lr=config.LR)
-    # optimizer = torchcontrib.optim.SWA(optimizer, swa_start=10, swa_freq=2, swa_lr=0.0011)
-    optimizer = torchcontrib.optim.SWA(optimizer)
+    optimizer = torchcontrib.optim.SWA(optimizer, swa_start=10, swa_freq=2, swa_lr=0.0011)
+    # optimizer = torchcontrib.optim.SWA(optimizer)
     schedular = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience=3, factor=0.2)
 
     avg_train_losses, avg_valid_losses = [], []
@@ -156,8 +156,8 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
 
         # schedular.step(loss)
         # 更行swa
-        if epoch >= 30 and epoch % 5 == 0:
-            optimizer.update_swa()
+        # if epoch >= 30 and epoch % 5 == 0:
+        #     optimizer.update_swa()
         # 切换成swa 进行valid 和 save
         optimizer.swap_swa_sgd()
         model.eval()  # prep model for evaluation
@@ -196,6 +196,7 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
 
         writer.add_scalars('cv_{}/loss'.format(index), {'train': train_loss, 'val': valid_loss}, epoch)
         writer.add_scalars('cv_{}/f1_score'.format(index), {'train': train_score, 'val': val_score}, epoch)
+        # optimizer.swap_swa_sgd()
 
         res = early_stopping(val_score, model)
 

@@ -16,7 +16,7 @@ import pandas as pd
 from tensorboardX import SummaryWriter
 import random
 
-EPOCHS = 90  # 150
+EPOCHS = 150  # 150
 NNBATCHSIZE = 32
 GROUP_BATCH_SIZE = 4000
 SEED = 123

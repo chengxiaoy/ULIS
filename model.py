@@ -132,10 +132,10 @@ class Wave_Block(nn.Module):
 
 
 class WaveNet(nn.Module):
-    def __init__(self):
+    def __init__(self, intput_n):
         super().__init__()
         input_size = 128
-        self.LSTM1 = nn.GRU(input_size=19, hidden_size=64, num_layers=2, batch_first=True, bidirectional=True)
+        self.LSTM1 = nn.GRU(input_size=intput_n, hidden_size=64, num_layers=2, batch_first=True, bidirectional=True)
 
         self.LSTM = nn.GRU(input_size=input_size, hidden_size=64, num_layers=2, batch_first=True, bidirectional=True)
         # self.attention = Attention(input_size,4000)
@@ -168,9 +168,18 @@ class WaveNet(nn.Module):
 
 
 def getModel(config):
+    model = None
+    if config.data_fe == 'shifted_proba':
+        input_size = 19
+    else:
+        input_size = 1
     if config.model_name == 'wave_net':
-        return WaveNet().to(config.device)
+        model = WaveNet(input_size)
+
+
     elif config.model_name == 'seq2seq':
-        return Seq2SeqRnn(input_size=1, seq_len=4000, hidden_size=64, output_size=11, num_layers=2,
-                          hidden_layers=[64, 64, 64],
-                          bidirectional=True).to(config.device)
+        model = Seq2SeqRnn(input_size=input_size, seq_len=4000, hidden_size=64, output_size=11, num_layers=2,
+                           hidden_layers=[64, 64, 64],
+                           bidirectional=True)
+    model.to(config.device)
+    return model

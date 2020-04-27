@@ -27,7 +27,7 @@ SPLITS = 5
 model_name = 'wave_net'
 gpu_id = 0
 device = torch.device("cuda:" + str(gpu_id) if torch.cuda.is_available() else "cpu")
-data_type = "raw"  # raw clean kalman_clean
+data_type = "kalman_clean"  # raw clean kalman_clean
 data_fe = "shifted_proba"  # none "shifted"
 data_group = False
 outdir = 'wavenet_models'
@@ -182,7 +182,7 @@ def get_group_index(group_id, train_length, test_length):
 writer = SummaryWriter(logdir=os.path.join("board/", str(config.expriment_id)))
 
 pred = np.zeros([20, 100000])
-for group_id in range(1):
+for group_id in range(5):
     test_y = np.zeros([int(2000000 / config.GROUP_BATCH_SIZE), config.GROUP_BATCH_SIZE, 1])
 
     train_group_indexs, test_group_indexs = get_group_index(group_id, len(train), len(test))
@@ -192,8 +192,7 @@ for group_id in range(1):
 
     test_preds_all = np.zeros([len(test_groups[group_id]) * 100000, 11])
 
-    for index in range(1):
-        index = 1
+    for index in range(5):
         train_index, val_index = new_splits[index]
         train_index = np.intersect1d(train_index, train_group_indexs)
         val_index = np.intersect1d(val_index, train_group_indexs)

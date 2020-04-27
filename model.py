@@ -44,7 +44,7 @@ class Seq2SeqRnn(nn.Module):
 
     def forward(self, x):
         batch_size = x.size(0)
-        x = x.permute(0, 2, 1)
+        # x = x.permute(0, 2, 1)
 
         outputs, hidden = self.rnn(x)
 

@@ -32,7 +32,7 @@ data_group = False
 outdir = 'wavenet_models'
 flip = False
 noise = False
-expriment_id = 0
+expriment_id = 1
 config = AttrDict({'EPOCHS': EPOCHS, 'NNBATCHSIZE': NNBATCHSIZE, 'GROUP_BATCH_SIZE': GROUP_BATCH_SIZE, 'SEED': SEED,
                    'LR': LR, 'SPLITS': SPLITS, 'model_name': model_name, 'device': device, 'outdir': outdir,
                    'expriment_id': expriment_id, 'data_type': data_type, 'data_fe': data_fe, 'noise': noise,

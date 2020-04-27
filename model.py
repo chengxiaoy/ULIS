@@ -178,7 +178,7 @@ def getModel(config):
 
 
     elif config.model_name == 'seq2seq':
-        model = Seq2SeqRnn(input_size=input_size, seq_len=4000, hidden_size=64, output_size=11, num_layers=2,
+        model = Seq2SeqRnn(input_size=input_size, seq_len=config.GROUP_BATCH_SIZE, hidden_size=64, output_size=11, num_layers=2,
                            hidden_layers=[64, 64, 64],
                            bidirectional=True)
     model.to(config.device)

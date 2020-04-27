@@ -15,6 +15,7 @@ import torch.nn.functional as F
 import pandas as pd
 from tensorboardX import SummaryWriter
 import random
+
 EPOCHS = 90  # 150
 NNBATCHSIZE = 32
 GROUP_BATCH_SIZE = 4000
@@ -30,10 +31,11 @@ data_group = False
 outdir = 'wavenet_models'
 flip = False
 noise = False
-expriment_id = 3
+expriment_id = 5
 config = AttrDict({'EPOCHS': EPOCHS, 'NNBATCHSIZE': NNBATCHSIZE, 'GROUP_BATCH_SIZE': GROUP_BATCH_SIZE, 'SEED': SEED,
                    'LR': LR, 'SPLITS': SPLITS, 'model_name': model_name, 'device': device, 'outdir': outdir,
-                   'expriment_id': expriment_id, 'data_type': data_type, 'data_fe': data_fe,'noise':noise,'flip':flip})
+                   'expriment_id': expriment_id, 'data_type': data_type, 'data_fe': data_fe, 'noise': noise,
+                   'flip': flip})
 
 
 def seed_everything(seed):
@@ -154,7 +156,8 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
 
         # schedular.step(loss)
         # 更行swa
-        optimizer.update_swa()
+        if epoch >= 30 and epoch % 5 == 0:
+            optimizer.update_swa()
         # 切换成swa 进行valid 和 save
         optimizer.swap_swa_sgd()
         model.eval()  # prep model for evaluation
@@ -224,8 +227,9 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
             # a = input()
         test_preds = np.vstack(pred_list)  # shape [2000000, 11]
         test_preds_all += test_preds
-writer.add_text("score_{}".format(config.expriment_id),'all folder score is:%s' % str(oof_score))
-writer.add_text("mean_score_{}".format(config.expriment_id),'OOF mean score is: %f' % (sum(oof_score) / len(oof_score)))
+writer.add_text("score_{}".format(config.expriment_id), 'all folder score is:%s' % str(oof_score))
+writer.add_text("mean_score_{}".format(config.expriment_id),
+                'OOF mean score is: %f' % (sum(oof_score) / len(oof_score)))
 print('all folder score is:%s' % str(oof_score))
 print('OOF mean score is: %f' % (sum(oof_score) / len(oof_score)))
 print('Generate submission.............')

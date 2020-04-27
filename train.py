@@ -215,7 +215,8 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
             # a = input()
         test_preds = np.vstack(pred_list)  # shape [2000000, 11]
         test_preds_all += test_preds
-
+writer.add_text("score_{}".format(config.expriment_id),'all folder score is:%s' % str(oof_score))
+writer.add_text("mean_score_{}".format(config.expriment_id),'OOF mean score is: %f' % (sum(oof_score) / len(oof_score)))
 print('all folder score is:%s' % str(oof_score))
 print('OOF mean score is: %f' % (sum(oof_score) / len(oof_score)))
 print('Generate submission.............')

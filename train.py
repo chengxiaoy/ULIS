@@ -14,7 +14,7 @@ import os
 import torch.nn.functional as F
 import pandas as pd
 from tensorboardX import SummaryWriter
-
+import random
 EPOCHS = 90  # 150
 NNBATCHSIZE = 32
 GROUP_BATCH_SIZE = 4000
@@ -34,6 +34,15 @@ expriment_id = 3
 config = AttrDict({'EPOCHS': EPOCHS, 'NNBATCHSIZE': NNBATCHSIZE, 'GROUP_BATCH_SIZE': GROUP_BATCH_SIZE, 'SEED': SEED,
                    'LR': LR, 'SPLITS': SPLITS, 'model_name': model_name, 'device': device, 'outdir': outdir,
                    'expriment_id': expriment_id, 'data_type': data_type, 'data_fe': data_fe,'noise':noise,'flip':flip})
+
+
+def seed_everything(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+
+
+seed_everything(config.seed)
 
 # read data and batching
 train, test, sub = get_data(config)

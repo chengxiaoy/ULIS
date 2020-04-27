@@ -1,5 +1,4 @@
 import os
-from data import IonDataset
 from torch.utils.data import DataLoader, Dataset
 from data import get_data, normalize, run_feat_engineering, feature_selection, batching, IronDataset, EarlyStopping
 from sklearn.model_selection import GroupKFold
@@ -186,8 +185,7 @@ for group_id in range(5):
     test_y = np.zeros([int(2000000 / config.GROUP_BATCH_SIZE), config.GROUP_BATCH_SIZE, 1])
 
     train_group_indexs, test_group_indexs = get_group_index(group_id, len(train), len(test))
-    test_dataset = IonDataset(test[test_group_indexs], test_y[test_group_indexs], flip=False, noise_level=0.0,
-                              class_split=0.0)
+    test_dataset = IronDataset(test[test_group_indexs], test_y[test_group_indexs], flip=False, noise_level=0.0)
     test_dataloader = DataLoader(test_dataset, config.NNBATCHSIZE, shuffle=False, num_workers=8, pin_memory=True)
 
     test_preds_all = np.zeros([len(test_groups[group_id]) * 100000, 11])
@@ -198,11 +196,10 @@ for group_id in range(5):
         val_index = np.intersect1d(val_index, train_group_indexs)
 
         batchsize = 16
-        train_dataset = IonDataset(train[train_index], train_tr[train_index], flip=False, noise_level=0.0,
-                                   class_split=0.0)
+        train_dataset = IronDataset(train[train_index], train_tr[train_index], flip=False, noise_level=0.0)
         train_dataloader = DataLoader(train_dataset, batchsize, shuffle=True, num_workers=8, pin_memory=True)
 
-        valid_dataset = IonDataset(train[val_index], train_tr[val_index], flip=False)
+        valid_dataset = IronDataset(train[val_index], train_tr[val_index], flip=False)
         valid_dataloader = DataLoader(valid_dataset, batchsize, shuffle=False, num_workers=4, pin_memory=True)
         model = getModel(config)
 

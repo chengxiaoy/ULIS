@@ -153,7 +153,7 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
             train_losses.append(loss.item())
             train_true = torch.cat([train_true, y_], 0)
             train_preds = torch.cat([train_preds, predictions_], 0)
-            if ii >= 20 and ii % 5 == 0:
+            if ii >= 10 and ii % 2 == 0:
                 optimizer.update_swa()
 
         # schedular.step(loss)
@@ -169,8 +169,8 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
         print('EVALUATION')
         with torch.no_grad():
             for x, y in tqdm(valid_dataloader):
-                x = x.cuda()  # .to(device)
-                y = y.cuda()  # ..to(device)
+                x = x.to(config.device)  # .to(device)
+                y = y.to(config.device)  # ..to(device)
 
                 predictions = model(x)
                 predictions_ = predictions.view(-1, predictions.shape[-1])
@@ -221,8 +221,8 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
     pred_list = []
     with torch.no_grad():
         for x, y in tqdm(test_dataloader):
-            x = x.cuda()
-            y = y.cuda()
+            x = x.to(config.device)  # .to(device)
+            y = y.to(config.device)  # ..to(device)
 
             predictions = model(x)
             predictions_ = predictions.view(-1, predictions.shape[-1])  # shape [128, 4000, 11]

@@ -31,8 +31,8 @@ if __name__ == '__main__':
     config.use_swa = True
     config_list.append(config)
 
-    for con in config_list:
-        test_config(con)
+    # for con in config_list:
+    #     test_config(con)
 
 
     for con in config_list:

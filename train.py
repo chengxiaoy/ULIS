@@ -26,8 +26,8 @@ if __name__ == '__main__':
     config.schedular = 'cyc'
     config_list.append(config)
 
-    for con in config_list:
-        test_config(con)
+    # for con in config_list:
+    #     test_config(con)
 
     for con in config_list:
         train_epoch_group(con)

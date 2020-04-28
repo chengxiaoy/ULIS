@@ -345,7 +345,9 @@ def train_epoch_group(config):
 
 def test_config(config):
     epoch = config.EPOCHS
-
+    print("========valid expriment {}=========".format(config.expriment_id))
     config.EPOCHS = 1
     train_epoch_group(config)
     config.EPOCHS = epoch
+    print("========valid over expriment {}=========".format(config.expriment_id))
+

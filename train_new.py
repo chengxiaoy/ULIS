@@ -340,3 +340,11 @@ def train_epoch_group(config):
         test_pred_frame = pd.DataFrame({'time': ss['time'].astype(str),
                                         'open_channels': np.argmax(test_preds_all, axis=1)})
         test_pred_frame.to_csv("./gru_preds_{}.csv".format(config.expriment_id), index=False)
+
+
+def test_config(config):
+    epoch = config.EPOCHS
+
+    config.EPOCHS = 1
+    train_epoch_group(config)
+    config.EPOCHS = epoch

@@ -155,6 +155,7 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
             train_preds = torch.cat([train_preds, predictions_], 0)
             if ii >= 10 and ii % 2 == 0:
                 optimizer.update_swa()
+            ii += 1
 
         # schedular.step(loss)
         # 更行swa

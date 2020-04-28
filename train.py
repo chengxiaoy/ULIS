@@ -31,7 +31,7 @@ data_group = False
 outdir = 'wavenet_models'
 flip = False
 noise = False
-expriment_id = 6
+expriment_id = 8
 config = AttrDict({'EPOCHS': EPOCHS, 'NNBATCHSIZE': NNBATCHSIZE, 'GROUP_BATCH_SIZE': GROUP_BATCH_SIZE, 'SEED': SEED,
                    'LR': LR, 'SPLITS': SPLITS, 'model_name': model_name, 'device': device, 'outdir': outdir,
                    'expriment_id': expriment_id, 'data_type': data_type, 'data_fe': data_fe, 'noise': noise,
@@ -205,7 +205,7 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
         res = early_stopping(val_score, model)
 
         # 再 切换回来
-        optimizer.swap_swa_sgd()
+        # optimizer.swap_swa_sgd()
         # print('fres:', res)
         if res == 2:
             print("Early Stopping")

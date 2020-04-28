@@ -31,7 +31,7 @@ data_group = False
 outdir = 'wavenet_models'
 flip = False
 noise = False
-expriment_id = 5
+expriment_id = 6
 config = AttrDict({'EPOCHS': EPOCHS, 'NNBATCHSIZE': NNBATCHSIZE, 'GROUP_BATCH_SIZE': GROUP_BATCH_SIZE, 'SEED': SEED,
                    'LR': LR, 'SPLITS': SPLITS, 'model_name': model_name, 'device': device, 'outdir': outdir,
                    'expriment_id': expriment_id, 'data_type': data_type, 'data_fe': data_fe, 'noise': noise,
@@ -111,9 +111,9 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
     weight = None  # cal_weights()
     criterion = nn.CrossEntropyLoss(weight=weight)
     optimizer = torch.optim.Adam(model.parameters(), lr=config.LR)
-    optimizer = torchcontrib.optim.SWA(optimizer, swa_start=10, swa_freq=2, swa_lr=0.0011)
-    # optimizer = torchcontrib.optim.SWA(optimizer)
-    schedular = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience=3, factor=0.2)
+    # optimizer = torchcontrib.optim.SWA(optimizer, swa_start=10, swa_freq=2, swa_lr=0.0011)
+    optimizer = torchcontrib.optim.SWA(optimizer)
+    schedular = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience=5, factor=0.2)
 
     avg_train_losses, avg_valid_losses = [], []
 
@@ -129,7 +129,7 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
         print('**********************************')
         print("Folder : {} Epoch : {}".format(index, epoch))
         print("Curr learning_rate: {:0.9f}".format(optimizer.param_groups[0]['lr']))
-
+        ii = 0
         # loss_fn(model(input), target).backward()
         for x, y in tqdm(train_dataloader):
             x = x.to(config.device)
@@ -153,12 +153,15 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
             train_losses.append(loss.item())
             train_true = torch.cat([train_true, y_], 0)
             train_preds = torch.cat([train_preds, predictions_], 0)
+            if ii >= 20 and ii % 5 == 0:
+                optimizer.update_swa()
 
         # schedular.step(loss)
         # 更行swa
         # if epoch >= 30 and epoch % 5 == 0:
         #     optimizer.update_swa()
         # 切换成swa 进行valid 和 save
+        # optimizer.update_swa()
         optimizer.swap_swa_sgd()
         model.eval()  # prep model for evaluation
 
@@ -201,7 +204,7 @@ for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
         res = early_stopping(val_score, model)
 
         # 再 切换回来
-        # optimizer.swap_swa_sgd()
+        optimizer.swap_swa_sgd()
         # print('fres:', res)
         if res == 2:
             print("Early Stopping")

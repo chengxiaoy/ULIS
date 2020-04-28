@@ -44,7 +44,7 @@ def buildConfig(gpu_id):
     config = AttrDict({'EPOCHS': EPOCHS, 'NNBATCHSIZE': NNBATCHSIZE, 'GROUP_BATCH_SIZE': GROUP_BATCH_SIZE, 'SEED': SEED,
                        'LR': LR, 'SPLITS': SPLITS, 'model_name': model_name, 'device': device, 'outdir': outdir,
                        'expriment_id': expriment_id, 'data_type': data_type, 'data_fe': data_fe, 'noise': noise,
-                       'flip': flip,  'group_train': group_train, 'loss': loss, "schedular": schedular,
+                       'flip': flip, 'group_train': group_train, 'loss': loss, "schedular": schedular,
                        'use_swa': use_swa})
     return config
 
@@ -234,6 +234,7 @@ def train_(model, train_dataloader, valid_dataloader, early_stopping,
         if early_stopping(val_score, model):
             print("Early Stopping...")
             print("Best Val Score: {:0.6f}".format(early_stopping.best_score))
+            writer.add_text("val_score", "valid_f1_score_{}".format(val_score), index)
             break
 
         print("--- %s seconds ---" % (time.time() - start_time))
@@ -304,7 +305,7 @@ def train_epoch_group(config):
             assert group_pred.shape[0] == len(test_groups[group_id])
             pred[test_groups[group_id]] = group_pred
         pred = np.concatenate(pred)
-        ss = pd.read_csv("/local/ULIS/data/sample_submission.csv", dtype={'time': str})
+        ss = pd.read_csv("data/sample_submission.csv", dtype={'time': str})
         test_pred_frame = pd.DataFrame({'time': ss['time'].astype(str), 'open_channels': pred.astype(np.int)})
         test_pred_frame.to_csv("./gru_preds_{}.csv".format(config.expriment_id), float_format='%.4f', index=False)
 
@@ -352,4 +353,3 @@ def test_config(config):
     train_epoch_group(config)
     config.EPOCHS = epoch
     print("========valid over expriment {}=========".format(config.expriment_id))
-

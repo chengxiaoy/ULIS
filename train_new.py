@@ -309,6 +309,8 @@ def train_epoch_group(config):
         test_pred_frame.to_csv("./gru_preds_{}.csv".format(config.expriment_id), float_format='%.4f', index=False)
 
     else:
+        pred = np.zeros((2000000, 11))
+
         train_dataloaders, valid_dataloaders, test_dataloaders = get_data_loader(config, None)
         index = 0
 

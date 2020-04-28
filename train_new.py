@@ -278,7 +278,8 @@ def train_epoch_group(config):
 
             test_preds_all = np.zeros([len(test_groups[group_id]) * 100000, 11])
             index = 0
-            for train_dataloader, valid_dataloader, test_dataloader in zip(train_dataloaders, valid_dataloaders):
+            for train_dataloader, valid_dataloader, test_dataloader in zip(train_dataloaders, valid_dataloaders,
+                                                                           test_dataloaders):
                 early_stopping = EarlyStopping(patience=20, is_maximize=False,
                                                checkpoint_path="./models/gru_clean_checkpoint_fold_{}_group_{}_exp_{}.pt".format(
                                                    index,
@@ -312,7 +313,8 @@ def train_epoch_group(config):
         train_dataloaders, valid_dataloaders, test_dataloaders = get_data_loader(config, None)
         index = 0
 
-        for train_dataloader, valid_dataloader, test_dataloader in zip(train_dataloaders, valid_dataloaders):
+        for train_dataloader, valid_dataloader, test_dataloader in zip(train_dataloaders, valid_dataloaders,
+                                                                       test_dataloaders):
             early_stopping = EarlyStopping(patience=20, is_maximize=False,
                                            checkpoint_path="./models/gru_clean_checkpoint_fold_{}_exp_{}.pt".format(
                                                index,

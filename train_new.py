@@ -231,7 +231,7 @@ def train_(model, train_dataloader, valid_dataloader, early_stopping,
         # writer.add_scalars('group_{}/cv_{}/acc'.format(group_id, index),
         #                    {'train': train_accurancy, 'val': val_accurancy},
         #                    epoch)
-        if early_stopping(val_score, model):
+        if early_stopping(val_score, model) == 2:
             print("Early Stopping...")
             print("Best Val Score: {:0.6f}".format(early_stopping.best_score))
             writer.add_text("val_score", "valid_f1_score_{}".format(val_score), index)

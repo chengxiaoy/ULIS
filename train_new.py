@@ -36,7 +36,6 @@ def buildConfig(gpu_id):
     flip = False
     noise = False
     expriment_id = 0
-    writer = SummaryWriter(logdir=os.path.join("board/", str(expriment_id)))
     loss = 'focal'  # ce or focal
     schedular = 'reduce'  # cos
     use_swa = False
@@ -142,7 +141,7 @@ def get_data_loader(config, group_id=None):
 
 def train_(model, train_dataloader, valid_dataloader, early_stopping,
            group_id, index, config):
-    writer = config.writer
+    writer = SummaryWriter(logdir=os.path.join("board/", str(config.expriment_id)))
     criterion = get_criterion(config)
     optimizer = get_optimizer(config, model)
     if config.use_swa:

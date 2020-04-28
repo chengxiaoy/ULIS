@@ -231,7 +231,7 @@ def train_(model, train_dataloader, valid_dataloader, early_stopping,
         # writer.add_scalars('group_{}/cv_{}/acc'.format(group_id, index),
         #                    {'train': train_accurancy, 'val': val_accurancy},
         #                    epoch)
-        if early_stopping(valid_loss, model):
+        if early_stopping(val_score, model):
             print("Early Stopping...")
             print("Best Val Score: {:0.6f}".format(early_stopping.best_score))
             break
@@ -279,7 +279,7 @@ def train_epoch_group(config):
             index = 0
             for train_dataloader, valid_dataloader, test_dataloader in zip(train_dataloaders, valid_dataloaders,
                                                                            test_dataloaders):
-                early_stopping = EarlyStopping(patience=20, is_maximize=False,
+                early_stopping = EarlyStopping(patience=15, is_maximize=True,
                                                checkpoint_path="./models/gru_clean_checkpoint_fold_{}_group_{}_exp_{}.pt".format(
                                                    index,
                                                    group_id, config.expriment_id))

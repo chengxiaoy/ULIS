@@ -265,7 +265,7 @@ def get_schedular(config, optimizer, loader_n):
 
     elif config.schedular == 'cyc':
         schedular = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=0.001,
-                                                      step_size_up=loader_n // 2)
+                                                      step_size_up=loader_n // 2,cycle_momentum = False)
         return schedular
 
 

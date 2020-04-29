@@ -20,11 +20,11 @@ if __name__ == '__main__':
     # config.schedular = 'cos'
     # config_list.append(config)
     #
-    # config = buildConfig(0)
-    # config.expriment_id = 4
-    # config.loss = 'focal'
-    # config.schedular = 'cyc'
-    # config_list.append(config)
+    config = buildConfig(0)
+    config.expriment_id = 4
+    config.loss = 'focal'
+    config.schedular = 'cyc'
+    config_list.append(config)
 
     config = buildConfig(0)
     config.expriment_id = 5

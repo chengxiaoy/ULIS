@@ -175,8 +175,6 @@ def getModel(config):
         input_size = 1
     if config.model_name == 'wave_net':
         model = WaveNet(input_size)
-
-
     elif config.model_name == 'seq2seq':
         model = Seq2SeqRnn(input_size=input_size, seq_len=config.GROUP_BATCH_SIZE, hidden_size=64, output_size=11, num_layers=2,
                            hidden_layers=[64, 64, 64],

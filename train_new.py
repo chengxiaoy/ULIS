@@ -233,12 +233,16 @@ def train_(model, train_dataloader, valid_dataloader, early_stopping,
         #                    {'train': train_accurancy, 'val': val_accurancy},
         #                    epoch)
         if early_stopping(val_score, model) == 2:
+            if config.use_swa and config.use_cbr:
+                optimizer.bn_update(train_dataloader, model, config.device)
+                early_stopping.save_model(model)
             print("Early Stopping...")
             print("Best Val Score: {:0.6f}".format(early_stopping.best_score))
             writer.add_text("val_score", "valid_f1_score_{}".format(val_score), index)
             break
 
         print("--- %s seconds ---" % (time.time() - start_time))
+
 
 
 def get_criterion(config):

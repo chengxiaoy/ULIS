@@ -107,10 +107,13 @@ class EarlyStopping:
     def load_best_weights(self, model):
         model.load_state_dict(torch.load(self.checkpoint_path))
 
+    def save_model(self, model):
+        torch.save(model.state_dict(), self.checkpoint_path)
+
     def __call__(self, score, model):
         if self.best_score is None or \
                 (score > self.best_score + self.delta if self.is_maximize else score < self.best_score - self.delta):
-            torch.save(model.state_dict(), self.checkpoint_path)
+            self.save_model(model)
             self.best_score, self.counter = score, 0
             return 1
         else:

@@ -102,6 +102,20 @@ class Attention(nn.Module):
         return torch.sum(weighted_input, 1)
 
 
+class CBR(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel, stride, dilation):
+        super(CBR, self).__init__()
+        self.cov = nn.Conv1d(in_channels, out_channels, kernel_size=kernel, stride=stride, dilation=dilation)
+        self.bn = nn.BatchNorm1d(out_channels)
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        x = self.cov(x)
+        x = self.bn(x)
+        x = self.relu(x)
+        return x
+
+
 class Wave_Block(nn.Module):
 
     def __init__(self, in_channels, out_channels, dilation_rates):
@@ -132,12 +146,20 @@ class Wave_Block(nn.Module):
 
 
 class WaveNet(nn.Module):
-    def __init__(self, intput_n):
+    def __init__(self, intput_n, length=4000, use_cbr=False):
         super().__init__()
         input_size = 128
-        self.LSTM1 = nn.GRU(input_size=intput_n, hidden_size=64, num_layers=2, batch_first=True, bidirectional=True)
-
-        self.LSTM = nn.GRU(input_size=input_size, hidden_size=64, num_layers=2, batch_first=True, bidirectional=True)
+        self.use_cbr = use_cbr
+        if use_cbr:
+            self.cbr1 = CBR(intput_n, 128, 7, 1, 1)
+            self.cbr2 = CBR(128, 32, 7, 1, 1)
+            self.bn1 = nn.BatchNorm1d(16)
+            self.bn2 = nn.BatchNorm1d(32)
+            self.bn3 = nn.BatchNorm1d(64)
+        else:
+            self.LSTM1 = nn.GRU(input_size=intput_n, hidden_size=64, num_layers=2, batch_first=True, bidirectional=True)
+            self.LSTM = nn.GRU(input_size=input_size, hidden_size=64, num_layers=2, batch_first=True,
+                               bidirectional=True)
         # self.attention = Attention(input_size,4000)
         # self.rnn = nn.RNN(input_size, 64, 2, batch_first=True, nonlinearity='relu')
 
@@ -145,20 +167,34 @@ class WaveNet(nn.Module):
         self.wave_block2 = Wave_Block(16, 32, 8)
         self.wave_block3 = Wave_Block(32, 64, 4)
         self.wave_block4 = Wave_Block(64, 128, 1)
-        self.fc = nn.Linear(128, 11)
+        if use_cbr:
+            self.fc = nn.Linear(32, 11)
+        else:
+            self.fc = nn.Linear(128, 11)
 
     def forward(self, x):
-        x, _ = self.LSTM1(x)
+        if not self.use_cbr:
+            x, _ = self.LSTM1(x)
         x = x.permute(0, 2, 1)
+        if self.use_cbr:
+            x = self.cbr1(x)
 
         x = self.wave_block1(x)
+        if self.use_cbr:
+            x = self.bn1(x)
         x = self.wave_block2(x)
+        if self.use_cbr:
+            x = self.bn2(x)
         x = self.wave_block3(x)
-
+        if self.use_cbr:
+            x = self.bn3(x)
         # x,_ = self.LSTM(x)
         x = self.wave_block4(x)
+        if self.use_cbr:
+            x = self.cbr2(x)
         x = x.permute(0, 2, 1)
-        x, _ = self.LSTM(x)
+        if not self.use_cbr:
+            x, _ = self.LSTM(x)
         # x = self.conv1(x)
         # print(x.shape)
         # x = self.rnn(x)
@@ -174,9 +210,13 @@ def getModel(config):
     else:
         input_size = 1
     if config.model_name == 'wave_net':
-        model = WaveNet(input_size)
+        if not config.use_cbr:
+            model = WaveNet(input_size)
+        else:
+            model = WaveNet(input_size, config.GROUP_BATCH_SIZE, True)
     elif config.model_name == 'seq2seq':
-        model = Seq2SeqRnn(input_size=input_size, seq_len=config.GROUP_BATCH_SIZE, hidden_size=64, output_size=11, num_layers=2,
+        model = Seq2SeqRnn(input_size=input_size, seq_len=config.GROUP_BATCH_SIZE, hidden_size=64, output_size=11,
+                           num_layers=2,
                            hidden_layers=[64, 64, 64],
                            bidirectional=True)
     model.to(config.device)

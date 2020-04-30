@@ -21,7 +21,7 @@ import time
 
 
 def buildConfig(gpu_id):
-    EPOCHS = 150  # 150
+    EPOCHS = 100  # 150
     NNBATCHSIZE = 32
     GROUP_BATCH_SIZE = 4000
     SEED = 123
@@ -39,13 +39,14 @@ def buildConfig(gpu_id):
     loss = 'focal'  # ce or focal
     schedular = 'reduce'  # cos
     use_swa = False
+    use_cbr = False
 
     group_train = False
     config = AttrDict({'EPOCHS': EPOCHS, 'NNBATCHSIZE': NNBATCHSIZE, 'GROUP_BATCH_SIZE': GROUP_BATCH_SIZE, 'SEED': SEED,
                        'LR': LR, 'SPLITS': SPLITS, 'model_name': model_name, 'device': device, 'outdir': outdir,
                        'expriment_id': expriment_id, 'data_type': data_type, 'data_fe': data_fe, 'noise': noise,
                        'flip': flip, 'group_train': group_train, 'loss': loss, "schedular": schedular,
-                       'use_swa': use_swa})
+                       'use_swa': use_swa,'use_cbr':use_cbr})
     return config
 
 

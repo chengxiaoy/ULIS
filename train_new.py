@@ -46,7 +46,7 @@ def buildConfig(gpu_id):
                        'LR': LR, 'SPLITS': SPLITS, 'model_name': model_name, 'device': device, 'outdir': outdir,
                        'expriment_id': expriment_id, 'data_type': data_type, 'data_fe': data_fe, 'noise': noise,
                        'flip': flip, 'group_train': group_train, 'loss': loss, "schedular": schedular,
-                       'use_swa': use_swa,'use_cbr':use_cbr})
+                       'use_swa': use_swa, 'use_cbr': use_cbr})
     return config
 
 
@@ -241,8 +241,10 @@ def train_(model, train_dataloader, valid_dataloader, early_stopping,
             writer.add_text("val_score", "valid_f1_score_{}".format(val_score), index)
             break
 
-        print("--- %s seconds ---" % (time.time() - start_time))
+        if config.use_swa:
+            optimizer.swap_swa_sgd()
 
+        print("--- %s seconds ---" % (time.time() - start_time))
 
 
 def get_criterion(config):
@@ -355,7 +357,7 @@ def train_epoch_group(config):
         print('all folder score is:%s' % str(oof_score))
         print('OOF mean score is: %f' % (sum(oof_score) / len(oof_score)))
         res_dict = {"scores": oof_score, "mean_score": (sum(oof_score) / len(oof_score))}
-        with open("res_{}.json".format(config.expriment_id)) as f:
+        with open("res_{}.json".format(config.expriment_id), "w") as f:
             json.dump(res_dict, f)
 
 

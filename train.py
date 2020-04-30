@@ -26,18 +26,26 @@ if __name__ == '__main__':
     # config.schedular = 'cyc'
     # config_list.append(config)
 
-    config = buildConfig(0)
-    config.expriment_id = 5
-    config.loss = 'ce'
-    config.schedular = 'cyc'
-    config_list.append(config)
+    # config = buildConfig(0)
+    # config.expriment_id = 5
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config_list.append(config)
 
     config = buildConfig(0)
     config.expriment_id = 6
-    config.loss = 'focal'
+    config.loss = 'ce'
     config.schedular = 'cyc'
     config.model_name = 'seq2seq'
     config_list.append(config)
+
+    config = buildConfig(0)
+    config.expriment_id = 7
+    config.loss = 'ce'
+    config.schedular = 'cyc'
+    config.use_cbr = True
+    config_list.append(config)
+
 
 
     # for con in config_list:

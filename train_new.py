@@ -16,7 +16,7 @@ import pandas as pd
 from tensorboardX import SummaryWriter
 import random
 from pytorch_toolbelt import losses as L
-
+import json
 import time
 
 
@@ -265,11 +265,12 @@ def get_schedular(config, optimizer, loader_n):
 
     elif config.schedular == 'cyc':
         schedular = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=0.001,
-                                                      step_size_up=loader_n // 2,cycle_momentum = False)
+                                                      step_size_up=loader_n // 2, cycle_momentum=False)
         return schedular
 
 
 def train_epoch_group(config):
+    oof_score = []
     seed_everything(config.SEED)
     pred = np.zeros([20, 100000])
     if config.group_train:
@@ -324,6 +325,7 @@ def train_epoch_group(config):
             model = getModel(config)
             train_(model, train_dataloader, valid_dataloader, early_stopping, 5, index, config)
             early_stopping.load_best_weights(model)
+            oof_score.append(round(early_stopping.best_score, 6))
             pred_list = []
             with torch.no_grad():
                 for x, y in tqdm(test_dataloader):
@@ -344,6 +346,12 @@ def train_epoch_group(config):
         test_pred_frame = pd.DataFrame({'time': ss['time'].astype(str),
                                         'open_channels': np.argmax(test_preds_all, axis=1)})
         test_pred_frame.to_csv("./gru_preds_{}.csv".format(config.expriment_id), index=False)
+
+        print('all folder score is:%s' % str(oof_score))
+        print('OOF mean score is: %f' % (sum(oof_score) / len(oof_score)))
+        res_dict = {"scores": oof_score, "mean_score": (sum(oof_score) / len(oof_score))}
+        with open("res_{}.json".format(config.expriment_id)) as f:
+            json.dump(res_dict, f)
 
 
 def test_config(config):

@@ -21,7 +21,7 @@ import time
 
 
 def buildConfig(gpu_id):
-    EPOCHS = 150  # 150
+    EPOCHS = 250  # 150
     NNBATCHSIZE = 32
     GROUP_BATCH_SIZE = 4000
     SEED = 123

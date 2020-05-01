@@ -40,16 +40,18 @@ if __name__ == '__main__':
     # config_list.append(config)
 
 
+
+
     # config = buildConfig(1)
-    # config.expriment_id = 106
-    # config.loss = 'ce'
+    # config.expriment_id = 107
+    # config.loss = 'focal'
     # config.schedular = 'cyc'
     # config.data_type = 'clean'
     # config_list.append(config)
 
     config = buildConfig(1)
-    config.expriment_id = 107
-    config.loss = 'focal'
+    config.expriment_id = 108
+    config.loss = 'ce'
     config.schedular = 'cyc'
     config.data_type = 'clean'
     config_list.append(config)

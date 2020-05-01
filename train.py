@@ -39,14 +39,22 @@ if __name__ == '__main__':
     # config.model_name = 'seq2seq'
     # config_list.append(config)
 
+    # config = buildConfig(0)
+    # config.expriment_id = 7
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.use_cbr = True
+    # config_list.append(config)
+
+
     config = buildConfig(0)
-    config.expriment_id = 7
+    config.expriment_id = 8
     config.loss = 'ce'
     config.schedular = 'cyc'
+    config.early_stop_max = False
     config.use_cbr = True
+
     config_list.append(config)
-
-
 
     # for con in config_list:
     #     test_config(con)

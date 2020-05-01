@@ -56,6 +56,15 @@ if __name__ == '__main__':
     config.data_type = 'clean'
     config_list.append(config)
 
+    config = buildConfig(1)
+    config.expriment_id = 109
+    config.loss = 'ce'
+    config.schedular = 'cyc'
+    config.use_cbr = True
+    config.data_type = 'clean'
+    config_list.append(config)
+
+
 
 
     # for con in config_list:

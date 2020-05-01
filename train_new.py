@@ -21,7 +21,7 @@ import time
 
 
 def buildConfig(gpu_id):
-    EPOCHS = 100  # 150
+    EPOCHS = 150  # 150
     NNBATCHSIZE = 32
     GROUP_BATCH_SIZE = 4000
     SEED = 123
@@ -40,13 +40,14 @@ def buildConfig(gpu_id):
     schedular = 'reduce'  # cos
     use_swa = False
     use_cbr = False
+    early_stop_max = True
 
     group_train = False
     config = AttrDict({'EPOCHS': EPOCHS, 'NNBATCHSIZE': NNBATCHSIZE, 'GROUP_BATCH_SIZE': GROUP_BATCH_SIZE, 'SEED': SEED,
                        'LR': LR, 'SPLITS': SPLITS, 'model_name': model_name, 'device': device, 'outdir': outdir,
                        'expriment_id': expriment_id, 'data_type': data_type, 'data_fe': data_fe, 'noise': noise,
                        'flip': flip, 'group_train': group_train, 'loss': loss, "schedular": schedular,
-                       'use_swa': use_swa, 'use_cbr': use_cbr})
+                       'use_swa': use_swa, 'use_cbr': use_cbr,'early_stop_max':early_stop_max})
     return config
 
 
@@ -232,7 +233,11 @@ def train_(model, train_dataloader, valid_dataloader, early_stopping,
         # writer.add_scalars('group_{}/cv_{}/acc'.format(group_id, index),
         #                    {'train': train_accurancy, 'val': val_accurancy},
         #                    epoch)
-        if early_stopping(val_score, model) == 2:
+        if config.early_stop_max:
+            metric = val_score
+        else:
+            metric = valid_loss
+        if early_stopping(metric, model) == 2:
             if config.use_swa and config.use_cbr:
                 optimizer.bn_update(train_dataloader, model, config.device)
                 early_stopping.save_model(model)
@@ -288,7 +293,7 @@ def train_epoch_group(config):
             index = 0
             for train_dataloader, valid_dataloader, test_dataloader in zip(train_dataloaders, valid_dataloaders,
                                                                            test_dataloaders):
-                early_stopping = EarlyStopping(patience=15, is_maximize=True,
+                early_stopping = EarlyStopping(patience=15, is_maximize=config.early_stop_max,
                                                checkpoint_path="./models/gru_clean_checkpoint_fold_{}_group_{}_exp_{}.pt".format(
                                                    index,
                                                    group_id, config.expriment_id))
@@ -325,7 +330,7 @@ def train_epoch_group(config):
 
         for train_dataloader, valid_dataloader, test_dataloader in zip(train_dataloaders, valid_dataloaders,
                                                                        test_dataloaders):
-            early_stopping = EarlyStopping(patience=30, is_maximize=True,
+            early_stopping = EarlyStopping(patience=30, is_maximize=config.early_stop_max,
                                            checkpoint_path="./models/gru_clean_checkpoint_fold_{}_exp_{}.pt".format(
                                                index,
                                                config.expriment_id))

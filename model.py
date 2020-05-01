@@ -105,7 +105,8 @@ class Attention(nn.Module):
 class CBR(nn.Module):
     def __init__(self, in_channels, out_channels, kernel, stride, dilation):
         super(CBR, self).__init__()
-        self.cov = nn.Conv1d(in_channels, out_channels, kernel_size=kernel, stride=stride, dilation=dilation)
+        self.cov = nn.Conv1d(in_channels, out_channels, kernel_size=kernel, stride=stride, dilation=dilation,
+                             padding=int((kernel - 1) / 2))
         self.bn = nn.BatchNorm1d(out_channels)
         self.relu = nn.ReLU()
 

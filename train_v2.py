@@ -49,12 +49,12 @@ if __name__ == '__main__':
     # config.data_type = 'clean'
     # config_list.append(config)
 
-    config = buildConfig(1)
-    config.expriment_id = 108
-    config.loss = 'ce'
-    config.schedular = 'cyc'
-    config.data_type = 'clean'
-    config_list.append(config)
+    # config = buildConfig(1)
+    # config.expriment_id = 108
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.data_type = 'clean'
+    # config_list.append(config)
 
     config = buildConfig(1)
     config.expriment_id = 109

@@ -153,14 +153,14 @@ class WaveNet(nn.Module):
         self.use_cbr = use_cbr
         if use_cbr:
             self.cbr1 = CBR(intput_n, 128, 7, 1, 1)
-            self.cbr2 = CBR(128, input_size, 7, 1, 1)
+            self.cbr2 = CBR(128, 32, 7, 1, 1)
             self.bn1 = nn.BatchNorm1d(16)
             self.bn2 = nn.BatchNorm1d(32)
             self.bn3 = nn.BatchNorm1d(64)
         else:
             self.LSTM1 = nn.GRU(input_size=intput_n, hidden_size=64, num_layers=2, batch_first=True, bidirectional=True)
-        self.LSTM = nn.GRU(input_size=input_size, hidden_size=64, num_layers=2, batch_first=True,
-                           bidirectional=True)
+            self.LSTM = nn.GRU(input_size=input_size, hidden_size=64, num_layers=2, batch_first=True,
+                               bidirectional=True)
         # self.attention = Attention(input_size,4000)
         # self.rnn = nn.RNN(input_size, 64, 2, batch_first=True, nonlinearity='relu')
 
@@ -168,10 +168,10 @@ class WaveNet(nn.Module):
         self.wave_block2 = Wave_Block(16, 32, 8)
         self.wave_block3 = Wave_Block(32, 64, 4)
         self.wave_block4 = Wave_Block(64, 128, 1)
-        # if use_cbr:
-        #     self.fc = nn.Linear(32, 11)
-        # else:
-        self.fc = nn.Linear(input_size, 11)
+        if use_cbr:
+            self.fc = nn.Linear(32, 11)
+        else:
+            self.fc = nn.Linear(128, 11)
 
     def forward(self, x):
         if not self.use_cbr:
@@ -194,8 +194,8 @@ class WaveNet(nn.Module):
         if self.use_cbr:
             x = self.cbr2(x)
         x = x.permute(0, 2, 1)
-        # if not self.use_cbr:
-        x, _ = self.LSTM(x)
+        if not self.use_cbr:
+            x, _ = self.LSTM(x)
         # x = self.conv1(x)
         # print(x.shape)
         # x = self.rnn(x)

@@ -151,6 +151,8 @@ class WaveNet(nn.Module):
         super().__init__()
         input_size = 128
         self.use_cbr = use_cbr
+        self.dropout = nn.Dropout(0.2)
+
         if use_cbr:
             self.cbr1 = CBR(intput_n, 128, 7, 1, 1)
             self.cbr2 = CBR(128, 32, 7, 1, 1)
@@ -194,8 +196,10 @@ class WaveNet(nn.Module):
         if self.use_cbr:
             x = self.cbr2(x)
         x = x.permute(0, 2, 1)
+
         if not self.use_cbr:
             x, _ = self.LSTM(x)
+        x = self.dropout(x)
         # x = self.conv1(x)
         # print(x.shape)
         # x = self.rnn(x)

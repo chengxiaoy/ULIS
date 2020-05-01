@@ -46,7 +46,6 @@ if __name__ == '__main__':
     # config.use_cbr = True
     # config_list.append(config)
 
-
     # config = buildConfig(0)
     # config.expriment_id = 8
     # config.loss = 'ce'
@@ -54,8 +53,16 @@ if __name__ == '__main__':
     # config.early_stop_max = False
     # config.use_cbr = True
 
+    # config = buildConfig(0)
+    # config.expriment_id = 9
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = False
+    # config.use_cbr = True
+
     config = buildConfig(0)
-    config.expriment_id = 9
+    config.NNBATCHSIZE = 16
+    config.expriment_id = 10
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = False

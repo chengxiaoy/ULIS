@@ -32,12 +32,12 @@ if __name__ == '__main__':
     # config.schedular = 'cyc'
     # config_list.append(config)
 
-    config = buildConfig(0)
-    config.expriment_id = 6
-    config.loss = 'ce'
-    config.schedular = 'cyc'
-    config.model_name = 'seq2seq'
-    config_list.append(config)
+    # config = buildConfig(0)
+    # config.expriment_id = 6
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.model_name = 'seq2seq'
+    # config_list.append(config)
 
     config = buildConfig(0)
     config.expriment_id = 7

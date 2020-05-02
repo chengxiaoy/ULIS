@@ -294,7 +294,7 @@ def train_epoch_group(config):
             index = 0
             for train_dataloader, valid_dataloader, test_dataloader in zip(train_dataloaders, valid_dataloaders,
                                                                            test_dataloaders):
-                early_stopping = EarlyStopping(patience=15, is_maximize=config.early_stop_max,
+                early_stopping = EarlyStopping(patience=40, is_maximize=config.early_stop_max,
                                                checkpoint_path="./models/gru_clean_checkpoint_fold_{}_group_{}_exp_{}.pt".format(
                                                    index,
                                                    group_id, config.expriment_id))

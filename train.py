@@ -68,8 +68,20 @@ if __name__ == '__main__':
     # config.early_stop_max = False
     # config.use_cbr = True
 
+    # config = buildConfig(0)
+    # config.expriment_id = 11
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = False
+    # config.use_cbr = True
+    # config.group_train = True
+    #
+    # config_list.append(config)
+
+
     config = buildConfig(0)
-    config.expriment_id = 11
+    config.expriment_id = 12
+    config.GROUP_BATCH_SIZE = 800
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = False

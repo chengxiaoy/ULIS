@@ -286,7 +286,8 @@ def train_epoch_group(config):
     seed_everything(config.SEED)
     pred = np.zeros([20, 100000])
     if config.group_train:
-        for group_id in range(5):
+        for group_id in range(1):
+            group_id = 4
             train_dataloaders, valid_dataloaders, test_dataloaders = get_data_loader(config, group_id)
 
             test_preds_all = np.zeros([len(test_groups[group_id]) * 100000, 11])

@@ -113,18 +113,27 @@ if __name__ == '__main__':
     # config.group_train = True
     # config_list.append(config)
 
-    config = buildConfig(1)
-    config.expriment_id = 31
-    # config.GROUP_BATCH_SIZE=2000
-    config.loss = 'ce'
-    config.schedular = 'cyc'
-    config.early_stop_max = False
-    config.use_cbr = True
-    config_list.append(config)
+    # config = buildConfig(1)
+    # config.expriment_id = 31
+    # # config.GROUP_BATCH_SIZE=2000
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = False
+    # config.use_cbr = True
+    # config_list.append(config)
+    #
+    # config = buildConfig(1)
+    # config.expriment_id = 32
+    # # config.NNBATCHSIZE=16
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = False
+    # config.use_cbr = True
+    # config_list.append(config)
 
     config = buildConfig(1)
-    config.expriment_id = 32
-    # config.NNBATCHSIZE=16
+    config.expriment_id = 33
+    config.data_fe = 'shifted'
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = False

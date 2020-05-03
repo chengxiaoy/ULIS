@@ -40,6 +40,7 @@ def buildConfig(gpu_id):
     schedular = 'reduce'  # cos
     use_swa = False
     use_cbr = False
+    use_se = False
     early_stop_max = True
 
     group_train = False
@@ -90,7 +91,7 @@ def get_data_loader(config, group_id=None):
     test = batching(test, batch_size=config.GROUP_BATCH_SIZE)
 
     # data feature engineering
-    if config.data_fe is not None and config.data_fe == 'shifted_proba':
+    if config.data_fe is not None and 'shifted' in config.data_fe:
         train, test = normalize(train, test)
         train = run_feat_engineering(train)
         test = run_feat_engineering(test)

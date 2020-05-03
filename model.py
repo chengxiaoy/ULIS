@@ -147,11 +147,15 @@ class Wave_Block(nn.Module):
 
 
 class WaveNet(nn.Module):
-    def __init__(self, intput_n, length=4000, use_cbr=False):
+    def __init__(self, intput_n, use_cbr=False, use_se=False):
         super().__init__()
         input_size = 128
         self.use_cbr = use_cbr
         self.dropout = nn.Dropout(0.2)
+        self.use_se = use_se
+        if use_se:
+            self.se1 = SELayer(128)
+            self.se2 = SELayer(128)
 
         if use_cbr:
             self.cbr1 = CBR(intput_n, 128, 7, 1, 1)
@@ -181,10 +185,12 @@ class WaveNet(nn.Module):
         x = x.permute(0, 2, 1)
         if self.use_cbr:
             x = self.cbr1(x)
-
+        if self.use_se:
+            x = self.se1(x)
         x = self.wave_block1(x)
         if self.use_cbr:
             x = self.bn1(x)
+
         x = self.wave_block2(x)
         if self.use_cbr:
             x = self.bn2(x)
@@ -193,6 +199,9 @@ class WaveNet(nn.Module):
             x = self.bn3(x)
         # x,_ = self.LSTM(x)
         x = self.wave_block4(x)
+
+        if self.use_se:
+            x = self.se2(x)
         if self.use_cbr:
             x = self.cbr2(x)
         x = x.permute(0, 2, 1)
@@ -208,17 +217,34 @@ class WaveNet(nn.Module):
         return x
 
 
+class SELayer(nn.Module):
+    def __init__(self, channel, reduction=16):
+        super(SELayer, self).__init__()
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.fc = nn.Sequential(
+            nn.Linear(channel, channel // reduction, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Linear(channel // reduction, channel, bias=False),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        b, c, _ = x.size()
+        y = self.avg_pool(x).view(b, c)
+        y = self.fc(y).view(b, c, 1)
+        return x * y.expand_as(x)
+
+
 def getModel(config):
     model = None
     if config.data_fe == 'shifted_proba':
         input_size = 19
+    elif config.data_fe == 'shifted':
+        input_size = 8
     else:
         input_size = 1
     if config.model_name == 'wave_net':
-        if not config.use_cbr:
-            model = WaveNet(input_size)
-        else:
-            model = WaveNet(input_size, config.GROUP_BATCH_SIZE, True)
+        model = WaveNet(input_size, config.use_cbr, config.use_se)
     elif config.model_name == 'seq2seq':
         model = Seq2SeqRnn(input_size=input_size, seq_len=config.GROUP_BATCH_SIZE, hidden_size=64, output_size=11,
                            num_layers=2,

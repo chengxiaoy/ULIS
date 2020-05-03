@@ -99,7 +99,7 @@ if __name__ == '__main__':
     config.data_fe = 'shifted'
     config.loss = 'ce'
     config.schedular = 'cyc'
-    config.early_stop_max = False
+    config.early_stop_max = True
     config.use_cbr = True
     config_list.append(config)
 
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     config.expriment_id = 84
     config.loss = 'ce'
     config.schedular = 'cyc'
-    config.early_stop_max = False
+    config.early_stop_max = True
     config.use_cbr = True
     config.use_se = True
     config_list.append(config)

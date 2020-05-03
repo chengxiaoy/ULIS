@@ -18,7 +18,7 @@ import random
 from pytorch_toolbelt import losses as L
 import json
 import time
-
+import joblib
 
 def buildConfig(gpu_id):
     EPOCHS = 250  # 150
@@ -356,6 +356,8 @@ def train_epoch_group(config):
         submission_csv_path = 'data/sample_submission.csv'
         ss = pd.read_csv(submission_csv_path, dtype={'time': str})
         test_preds_all = pred / np.sum(pred, axis=1)[:, None]
+
+        joblib.dump(test_preds_all,"pred_{}.pkl".format(config.expriment_id))
         test_pred_frame = pd.DataFrame({'time': ss['time'].astype(str),
                                         'open_channels': np.argmax(test_preds_all, axis=1)})
         test_pred_frame.to_csv("./gru_preds_{}.csv".format(config.expriment_id), index=False)

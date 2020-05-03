@@ -2,14 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from pomegranate import NormalDistribution
+# from pomegranate import NormalDistribution
 from sklearn.metrics import f1_score, accuracy_score
 import helper
 import time
 from pykalman import KalmanFilter
+import joblib
 
-
-def viterbi(p_trans, p_signal, p_in, signal):
+def viterbi(p_trans, p_signal, p_in, signal,index_id):
     offset = 10 ** (-20)  # added to values to avoid problems with log2(0)
 
     p_trans_tlog = np.transpose(np.log2(p_trans + offset))  # p_trans, logarithm + transposed
@@ -24,6 +24,8 @@ def viterbi(p_trans, p_signal, p_in, signal):
         p_max_pre.append(np.argmax(p_state_log[-1] + p_trans_tlog, axis=1))
 
         p_state_log.append(np.max(p_state_log[-1] + p_trans_tlog, axis=1) + p_signal_tlog[s])  # the Viterbi algorithm
+
+    joblib.dump(p_state_log,"viterbi_pred_{}.pkl".format(index_id))
 
     max_states = np.argmax(p_state_log, axis=1)  # finding the most probable states
     # return max_states
@@ -97,12 +99,12 @@ def calc_markov_p_signal(state, signal, num_bins=3000):
     return p_signal, signal_bins
 
 
-def calc_markov_p_signal_2(states, signals):
-    emiting_pdf = {}
-    for state in np.unique(states):
-        emiting_pdf[state] = NormalDistribution.from_samples(signals[states == state])
-
-    return emiting_pdf
+# def calc_markov_p_signal_2(states, signals):
+#     emiting_pdf = {}
+#     for state in np.unique(states):
+#         emiting_pdf[state] = NormalDistribution.from_samples(signals[states == state])
+#
+#     return emiting_pdf
 
 
 # Function from https://www.kaggle.com/aussie84/train-fare-trends-using-kalman-filter-1d
@@ -149,13 +151,13 @@ class ViterbiModel():
         self.p_in = np.ones(len(self.p_trans)) / len(self.p_trans)
         return self
 
-    def decoding(self, signals):
+    def decoding(self, signals,index_id):
         if self.kalman_filter:
             observation_covariance = .0015
             signals = Kalman1D(signals, observation_covariance).reshape(-1)
         signal_dig = digitize_signal(signals, self.signal_bins)
         # return viterbi_2(self.p_trans, self.p_emit, self.p_in, signals)
-        return viterbi(self.p_trans, self.p_emit, self.p_in, signal_dig)
+        return viterbi(self.p_trans, self.p_emit, self.p_in, signal_dig,index_id)
 
 
 if __name__ == '__main__':
@@ -173,7 +175,7 @@ if __name__ == '__main__':
         model.learning(true_state_train, signal_train)
 
         for test_grp in test_group:
-            test_y_pred[test_grp] = model.decoding(test_signals[test_grp])
+            test_y_pred[test_grp] = model.decoding(test_signals[test_grp],test_grp)
         print("cost {} s".format(time.time() - since))
 
     test_y_pred = np.concatenate(test_y_pred)

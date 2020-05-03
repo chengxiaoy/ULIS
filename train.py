@@ -94,14 +94,14 @@ if __name__ == '__main__':
     # config.use_cbr = True
     # config_list.append(config)
 
-    config = buildConfig(1)
-    config.expriment_id = 83
-    config.data_fe = 'shifted'
-    config.loss = 'ce'
-    config.schedular = 'cyc'
-    config.early_stop_max = True
-    config.use_cbr = True
-    config_list.append(config)
+    # config = buildConfig(1)
+    # config.expriment_id = 83
+    # config.data_fe = 'shifted'
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = True
+    # config.use_cbr = True
+    # config_list.append(config)
 
     config = buildConfig(0)
     config.expriment_id = 84

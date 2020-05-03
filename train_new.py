@@ -48,7 +48,7 @@ def buildConfig(gpu_id):
                        'LR': LR, 'SPLITS': SPLITS, 'model_name': model_name, 'device': device, 'outdir': outdir,
                        'expriment_id': expriment_id, 'data_type': data_type, 'data_fe': data_fe, 'noise': noise,
                        'flip': flip, 'group_train': group_train, 'loss': loss, "schedular": schedular,
-                       'use_swa': use_swa, 'use_cbr': use_cbr,'early_stop_max':early_stop_max})
+                       'use_swa': use_swa, 'use_cbr': use_cbr,'early_stop_max':early_stop_max,'use_se':use_se})
     return config
 
 

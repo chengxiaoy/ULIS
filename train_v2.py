@@ -84,33 +84,51 @@ if __name__ == '__main__':
     # config.use_cbr = True
     # config.group_train = True
 
-    config = buildConfig(0)
-    config.expriment_id = 110
+    # config = buildConfig(0)
+    # config.expriment_id = 110
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = False
+    # config.use_cbr = True
+    # config.group_train = True
+    # config_list.append(config)
+    #
+    # config = buildConfig(0)
+    # config.expriment_id = 111
+    # config.NNBATCHSIZE = 16
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = False
+    # config.use_cbr = True
+    # config.group_train = True
+    # config_list.append(config)
+    #
+    # config = buildConfig(0)
+    # config.expriment_id = 112
+    # config.GROUP_BATCH_SIZE = 2000
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = False
+    # config.use_cbr = True
+    # config.group_train = True
+    # config_list.append(config)
+
+    config = buildConfig(1)
+    config.expriment_id = 31
+    # config.GROUP_BATCH_SIZE=2000
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = False
     config.use_cbr = True
-    config.group_train = True
     config_list.append(config)
 
-    config = buildConfig(0)
-    config.expriment_id = 111
-    config.NNBATCHSIZE = 16
+    config = buildConfig(1)
+    config.expriment_id = 32
+    # config.NNBATCHSIZE=16
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = False
     config.use_cbr = True
-    config.group_train = True
-    config_list.append(config)
-
-    config = buildConfig(0)
-    config.expriment_id = 112
-    config.GROUP_BATCH_SIZE = 2000
-    config.loss = 'ce'
-    config.schedular = 'cyc'
-    config.early_stop_max = False
-    config.use_cbr = True
-    config.group_train = True
     config_list.append(config)
 
 

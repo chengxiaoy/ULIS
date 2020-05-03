@@ -132,13 +132,35 @@ if __name__ == '__main__':
     # config_list.append(config)
 
     config = buildConfig(1)
-    config.expriment_id = 33
+    config.expriment_id = 113
     config.data_fe = 'shifted'
     config.loss = 'ce'
     config.schedular = 'cyc'
-    config.early_stop_max = False
+    config.early_stop_max = True
     config.use_cbr = True
+    config.group_train = True
     config_list.append(config)
+
+
+    config = buildConfig(1)
+    config.expriment_id = 114
+    config.loss = 'ce'
+    config.schedular = 'cyc'
+    config.early_stop_max = True
+    config.use_cbr = True
+    config.group_train = True
+    config_list.append(config)
+
+    config = buildConfig(1)
+    config.expriment_id = 115
+    config.NNBATCHSIZE = 16
+    config.loss = 'ce'
+    config.schedular = 'cyc'
+    config.early_stop_max = True
+    config.use_cbr = True
+    config.group_train = True
+    config_list.append(config)
+
 
 
 

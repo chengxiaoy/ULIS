@@ -160,9 +160,9 @@ class WaveNet(nn.Module):
         if use_cbr:
             self.cbr1 = CBR(intput_n, 128, 7, 1, 1)
             self.cbr2 = CBR(128, 32, 7, 1, 1)
-            self.bn1 = nn.BatchNorm1d(32)
-            self.bn2 = nn.BatchNorm1d(64)
-            self.bn3 = nn.BatchNorm1d(64)
+            self.bn1 = nn.BatchNorm1d(128)
+            self.bn2 = nn.BatchNorm1d(128)
+            self.bn3 = nn.BatchNorm1d(128)
         else:
             self.LSTM1 = nn.GRU(input_size=intput_n, hidden_size=64, num_layers=2, batch_first=True, bidirectional=True)
             self.LSTM = nn.GRU(input_size=input_size, hidden_size=64, num_layers=2, batch_first=True,
@@ -170,10 +170,10 @@ class WaveNet(nn.Module):
         # self.attention = Attention(input_size,4000)
         # self.rnn = nn.RNN(input_size, 64, 2, batch_first=True, nonlinearity='relu')
 
-        self.wave_block1 = Wave_Block(128, 32, 12)
-        self.wave_block2 = Wave_Block(32, 64, 8)
-        self.wave_block3 = Wave_Block(64, 64, 4)
-        self.wave_block4 = Wave_Block(64, 128, 1)
+        self.wave_block1 = Wave_Block(128, 128, 12)
+        self.wave_block2 = Wave_Block(128, 128, 8)
+        self.wave_block3 = Wave_Block(128, 128, 4)
+        self.wave_block4 = Wave_Block(128, 128, 1)
         if use_cbr:
             self.fc = nn.Linear(32, 11)
         else:

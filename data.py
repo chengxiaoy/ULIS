@@ -53,7 +53,7 @@ def lag_with_pct_change(df, windows):
     return df
 
 
-def run_feat_engineering(df, config):
+def run_feat_engineering(df):
     # create batches
     # create leads and lags (1, 2, 3 making them 6 features)
     df = lag_with_pct_change(df, [1, 2, 3, 4])

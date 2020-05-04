@@ -112,24 +112,31 @@ if __name__ == '__main__':
     # config.use_se = True
     # config_list.append(config)
 
+    # config = buildConfig(0)
+    # config.expriment_id = 85
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = True
+    # config.use_cbr = True
+    # config.use_se = False
+    # config_list.append(config)
+
+    # config = buildConfig(0)
+    # config.expriment_id = 86
+    # config.data_fe = 'shifted'
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = True
+    # config.use_cbr = True
+    # config.use_se = False
+    # config_list.append(config)
+
     config = buildConfig(0)
-    config.expriment_id = 85
+    config.expriment_id = 87
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = True
     config.use_cbr = True
-    config.use_se = False
-    config_list.append(config)
-
-    config = buildConfig(0)
-    config.expriment_id = 86
-    config.data_fe = 'shifted'
-
-    config.loss = 'ce'
-    config.schedular = 'cyc'
-    config.early_stop_max = True
-    config.use_cbr = True
-    config.use_se = False
     config_list.append(config)
 
     # for con in config_list:

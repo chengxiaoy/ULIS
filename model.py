@@ -159,7 +159,7 @@ class WaveNet(nn.Module):
 
         if use_cbr:
             self.cbr1 = CBR(intput_n, 128, 7, 1, 1)
-            self.cbr2 = CBR(128, 128, 7, 1, 1)
+            self.cbr2 = CBR(128, 32, 7, 1, 1)
             self.bn1 = nn.BatchNorm1d(16)
             self.bn2 = nn.BatchNorm1d(32)
             self.bn3 = nn.BatchNorm1d(64)
@@ -174,10 +174,10 @@ class WaveNet(nn.Module):
         self.wave_block2 = Wave_Block(16, 32, 8)
         self.wave_block3 = Wave_Block(32, 64, 4)
         self.wave_block4 = Wave_Block(64, 128, 1)
-        # if use_cbr:
-        #     self.fc = nn.Linear(32, 11)
-        # else:
-        self.fc = nn.Linear(128, 11)
+        if use_cbr:
+            self.fc = nn.Linear(32, 11)
+        else:
+            self.fc = nn.Linear(128, 11)
 
     def forward(self, x):
         if not self.use_cbr:

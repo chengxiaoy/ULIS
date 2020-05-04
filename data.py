@@ -53,12 +53,29 @@ def lag_with_pct_change(df, windows):
     return df
 
 
-def run_feat_engineering(df):
+def run_feat_engineering(df, config):
     # create batches
     # create leads and lags (1, 2, 3 making them 6 features)
-    df = lag_with_pct_change(df, [1, 2, 3])
+    df = lag_with_pct_change(df, [1, 2, 3, 4])
+
+    df = create_rolling_features(df, [10, 50])
     # create signal ** 2 (this is the new feature)
     df['signal_2'] = df['signal'] ** 2
+    return df
+
+
+def create_rolling_features(df, WINDOWS):
+    for window in WINDOWS:
+        df["rolling_mean_" + str(window)] = df['signal'].rolling(window=window).mean()
+        df["rolling_std_" + str(window)] = df['signal'].rolling(window=window).std()
+        df["rolling_var_" + str(window)] = df['signal'].rolling(window=window).var()
+        df["rolling_min_" + str(window)] = df['signal'].rolling(window=window).min()
+        df["rolling_max_" + str(window)] = df['signal'].rolling(window=window).max()
+        df["rolling_min_max_ratio_" + str(window)] = df["rolling_min_" + str(window)] / df["rolling_max_" + str(window)]
+        df["rolling_min_max_diff_" + str(window)] = df["rolling_max_" + str(window)] - df["rolling_min_" + str(window)]
+
+    df = df.replace([np.inf, -np.inf], np.nan)
+    df.fillna(0, inplace=True)
     return df
 
 

@@ -160,8 +160,8 @@ class WaveNet(nn.Module):
         if use_cbr:
             self.cbr1 = CBR(intput_n, 128, 7, 1, 1)
             self.cbr2 = CBR(128, 32, 7, 1, 1)
-            self.bn1 = nn.BatchNorm1d(16)
-            self.bn2 = nn.BatchNorm1d(32)
+            self.bn1 = nn.BatchNorm1d(32)
+            self.bn2 = nn.BatchNorm1d(64)
             self.bn3 = nn.BatchNorm1d(64)
         else:
             self.LSTM1 = nn.GRU(input_size=intput_n, hidden_size=64, num_layers=2, batch_first=True, bidirectional=True)

@@ -161,13 +161,32 @@ if __name__ == '__main__':
     # config.group_train = True
     # config_list.append(config)
 
+    # config = buildConfig(1)
+    # config.expriment_id = 120
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = True
+    # config.use_cbr = True
+    # config_list.append(config)
+
     config = buildConfig(1)
-    config.expriment_id = 120
+    config.NNBATCHSIZE = 16
+    config.expriment_id = 121
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = True
     config.use_cbr = True
     config_list.append(config)
+
+    config = buildConfig(1)
+    config.GROUP_BATCH_SIZE = 2000
+    config.expriment_id = 122
+    config.loss = 'ce'
+    config.schedular = 'cyc'
+    config.early_stop_max = True
+    config.use_cbr = True
+    config_list.append(config)
+
 
 
 

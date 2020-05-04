@@ -170,9 +170,9 @@ class WaveNet(nn.Module):
         # self.attention = Attention(input_size,4000)
         # self.rnn = nn.RNN(input_size, 64, 2, batch_first=True, nonlinearity='relu')
 
-        self.wave_block1 = Wave_Block(128, 16, 12)
-        self.wave_block2 = Wave_Block(16, 32, 8)
-        self.wave_block3 = Wave_Block(32, 64, 4)
+        self.wave_block1 = Wave_Block(128, 32, 12)
+        self.wave_block2 = Wave_Block(32, 64, 8)
+        self.wave_block3 = Wave_Block(64, 64, 4)
         self.wave_block4 = Wave_Block(64, 128, 1)
         if use_cbr:
             self.fc = nn.Linear(32, 11)
@@ -238,7 +238,7 @@ class SELayer(nn.Module):
 def getModel(config):
     model = None
     if config.data_fe == 'shifted_proba':
-        input_size = 19
+        input_size = 33
     elif config.data_fe == 'shifted':
         input_size = 8
     else:

@@ -156,7 +156,7 @@ if __name__ == '__main__':
     # config_list.append(config)
 
     config = buildConfig(0)
-    config.NNBATCHSIZE = 16
+    config.NNBATCHSIZE = 64
     config.expriment_id = 90
     config.loss = 'ce'
     config.schedular = 'cyc'
@@ -165,7 +165,7 @@ if __name__ == '__main__':
     config_list.append(config)
 
     config = buildConfig(0)
-    config.GROUP_BATCH_SIZE = 2000
+    config.GROUP_BATCH_SIZE = 8000
     config.expriment_id = 91
     config.loss = 'ce'
     config.schedular = 'cyc'

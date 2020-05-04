@@ -139,8 +139,16 @@ if __name__ == '__main__':
     # config.use_cbr = True
     # config_list.append(config)
 
+    # config = buildConfig(0)
+    # config.expriment_id = 88
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = True
+    # config.use_cbr = True
+    # config_list.append(config)
+
     config = buildConfig(0)
-    config.expriment_id = 88
+    config.expriment_id = 89
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = True

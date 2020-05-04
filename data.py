@@ -58,7 +58,7 @@ def run_feat_engineering(df):
     # create leads and lags (1, 2, 3 making them 6 features)
     df = lag_with_pct_change(df, [1, 2, 3, 4])
 
-    df = create_rolling_features(df, [10, 50])
+    df = create_rolling_features(df, [3, 5])
     # create signal ** 2 (this is the new feature)
     df['signal_2'] = df['signal'] ** 2
     return df

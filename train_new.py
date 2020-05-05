@@ -20,6 +20,7 @@ import json
 import time
 import joblib
 
+
 def buildConfig(gpu_id):
     EPOCHS = 250  # 150
     NNBATCHSIZE = 32
@@ -42,13 +43,18 @@ def buildConfig(gpu_id):
     use_cbr = False
     use_se = False
     early_stop_max = True
+    gaussian_noise = False
+    gaussian_noise_std = 0.1
+    drop_out = 0.2
 
     group_train = False
     config = AttrDict({'EPOCHS': EPOCHS, 'NNBATCHSIZE': NNBATCHSIZE, 'GROUP_BATCH_SIZE': GROUP_BATCH_SIZE, 'SEED': SEED,
                        'LR': LR, 'SPLITS': SPLITS, 'model_name': model_name, 'device': device, 'outdir': outdir,
                        'expriment_id': expriment_id, 'data_type': data_type, 'data_fe': data_fe, 'noise': noise,
                        'flip': flip, 'group_train': group_train, 'loss': loss, "schedular": schedular,
-                       'use_swa': use_swa, 'use_cbr': use_cbr,'early_stop_max':early_stop_max,'use_se':use_se})
+                       'use_swa': use_swa, 'use_cbr': use_cbr, 'early_stop_max': early_stop_max, 'use_se': use_se,
+                       'gaussian_noise': gaussian_noise, "gaussian_noise_std": gaussian_noise_std,
+                       'drop_out': drop_out})
     return config
 
 
@@ -357,7 +363,7 @@ def train_epoch_group(config):
         ss = pd.read_csv(submission_csv_path, dtype={'time': str})
         test_preds_all = pred / np.sum(pred, axis=1)[:, None]
 
-        joblib.dump(test_preds_all,"pred_{}.pkl".format(config.expriment_id))
+        joblib.dump(test_preds_all, "pred_{}.pkl".format(config.expriment_id))
         test_pred_frame = pd.DataFrame({'time': ss['time'].astype(str),
                                         'open_channels': np.argmax(test_preds_all, axis=1)})
         test_pred_frame.to_csv("./gru_preds_{}.csv".format(config.expriment_id), index=False)

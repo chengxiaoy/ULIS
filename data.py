@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import torch
 from torch.utils.data import Dataset
+import numpy as np
 
 
 def get_data(config):
@@ -18,6 +19,12 @@ def get_data(config):
     elif config.data_type == 'kalman_clean':
         train = pd.read_csv('data/train_clean_kalman.csv')
         test = pd.read_csv('data/test_clean_kalman.csv')
+
+    if config.gaussian_noise:
+        train_noise = np.random.normal(0, config.gaussian_noise_std, 500 * 10000)
+        test_noise = np.random.normal(0, config.gaussian_noise_std, 200 * 10000)
+        train['signal'] = train['signal'].values + train_noise
+        test['signal'] = test['signal'].values + test_noise
 
     if config.data_fe == 'shifted_proba':
         Y_train_proba = np.load("data/Y_train_proba.npy")

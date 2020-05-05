@@ -147,17 +147,17 @@ class Wave_Block(nn.Module):
 
 
 class WaveNet(nn.Module):
-    def __init__(self, intput_n, use_cbr=False, use_se=False):
+    def __init__(self, intput_n, config):
         super().__init__()
         input_size = 128
-        self.use_cbr = use_cbr
-        self.dropout = nn.Dropout(0.2)
-        self.use_se = use_se
-        if use_se:
+        self.use_cbr = config.use_cbr
+        self.dropout = nn.Dropout(config.dropout)
+        self.use_se = config.use_se
+        if config.use_se:
             self.se1 = SELayer(128)
             self.se2 = SELayer(128)
 
-        if use_cbr:
+        if config.use_cbr:
             self.cbr1 = CBR(intput_n, 128, 7, 1, 1)
             self.cbr2 = CBR(128, 32, 7, 1, 1)
             self.bn1 = nn.BatchNorm1d(128)
@@ -174,7 +174,7 @@ class WaveNet(nn.Module):
         self.wave_block2 = Wave_Block(128, 128, 8)
         self.wave_block3 = Wave_Block(128, 128, 4)
         self.wave_block4 = Wave_Block(128, 128, 1)
-        if use_cbr:
+        if config.use_cbr:
             self.fc = nn.Linear(32, 11)
         else:
             self.fc = nn.Linear(128, 11)
@@ -244,7 +244,7 @@ def getModel(config):
     else:
         input_size = 1
     if config.model_name == 'wave_net':
-        model = WaveNet(input_size, config.use_cbr, config.use_se)
+        model = WaveNet(input_size, config)
     elif config.model_name == 'seq2seq':
         model = Seq2SeqRnn(input_size=input_size, seq_len=config.GROUP_BATCH_SIZE, hidden_size=64, output_size=11,
                            num_layers=2,

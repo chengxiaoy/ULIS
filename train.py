@@ -155,23 +155,44 @@ if __name__ == '__main__':
     # config.use_cbr = True
     # config_list.append(config)
 
+    # config = buildConfig(0)
+    # config.NNBATCHSIZE = 64
+    # config.expriment_id = 90
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = True
+    # config.use_cbr = True
+    # config_list.append(config)
+    #
+    # config = buildConfig(0)
+    # config.GROUP_BATCH_SIZE = 8000
+    # config.expriment_id = 91
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = True
+    # config.use_cbr = True
+    # config_list.append(config)
+    #
+
     config = buildConfig(0)
-    config.NNBATCHSIZE = 64
-    config.expriment_id = 90
+    config.expriment_id = 92
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = True
     config.use_cbr = True
+    config.gaussian_noise = True
     config_list.append(config)
 
     config = buildConfig(0)
-    config.GROUP_BATCH_SIZE = 8000
-    config.expriment_id = 91
+    config.expriment_id = 93
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = True
     config.use_cbr = True
+    config.drop_out = 0.5
     config_list.append(config)
+
+
 
     # for con in config_list:
     #     test_config(con)

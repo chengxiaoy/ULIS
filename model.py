@@ -130,9 +130,9 @@ class Wave_Block(nn.Module):
         dilation_rates = [2 ** i for i in range(dilation_rates)]
         for dilation_rate in dilation_rates:
             self.filter_convs.append(
-                nn.Conv1d(out_channels, out_channels, kernel_size=5, padding=dilation_rate, dilation=dilation_rate))
+                nn.Conv1d(out_channels, out_channels, kernel_size=3, padding=dilation_rate, dilation=dilation_rate))
             self.gate_convs.append(
-                nn.Conv1d(out_channels, out_channels, kernel_size=5, padding=dilation_rate, dilation=dilation_rate))
+                nn.Conv1d(out_channels, out_channels, kernel_size=3, padding=dilation_rate, dilation=dilation_rate))
             self.convs.append(nn.Conv1d(out_channels, out_channels, kernel_size=1))
 
     def forward(self, x):
@@ -238,7 +238,7 @@ class SELayer(nn.Module):
 def getModel(config):
     model = None
     if config.data_fe == 'shifted_proba':
-        input_size = 19
+        input_size = 26
     elif config.data_fe == 'shifted':
         input_size = 8
     else:

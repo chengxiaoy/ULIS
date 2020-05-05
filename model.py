@@ -151,7 +151,7 @@ class WaveNet(nn.Module):
         super().__init__()
         input_size = 128
         self.use_cbr = config.use_cbr
-        self.dropout = nn.Dropout(config.dropout)
+        self.dropout = nn.Dropout(config.drop_out)
         self.use_se = config.use_se
         if config.use_se:
             self.se1 = SELayer(128)

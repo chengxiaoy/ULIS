@@ -219,7 +219,7 @@ if __name__ == '__main__':
     # config_list.append(config)
 
     config = buildConfig(0)
-    config.expriment_id = 96
+    config.expriment_id = 97
     config.data_fe = 'shifted'
     config.loss = 'ce'
     config.schedular = 'cyc'

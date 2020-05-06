@@ -209,6 +209,8 @@ if __name__ == '__main__':
     # shift 1,2,3
     config = buildConfig(0)
     config.expriment_id = 95
+    config.data_fe = 'shifted_viterbi_proba'
+
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = True

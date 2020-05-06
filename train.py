@@ -194,16 +194,27 @@ if __name__ == '__main__':
 
 
 
+    # config = buildConfig(0)
+    # config.data_type  = 'clean'
+    # config.expriment_id = 94
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = True
+    # config.use_cbr = True
+    # config.drop_out = 0.5
+    # config_list.append(config)
+
+
+
+    # shift 1,2,3
     config = buildConfig(0)
-    config.data_type  = 'clean'
-    config.expriment_id = 94
+    config.expriment_id = 95
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = True
     config.use_cbr = True
     config.drop_out = 0.5
     config_list.append(config)
-
 
     # for con in config_list:
     #     test_config(con)

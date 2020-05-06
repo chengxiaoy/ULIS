@@ -238,7 +238,7 @@ class SELayer(nn.Module):
 def getModel(config):
     model = None
     if config.data_fe == 'shifted_proba' or config.data_fe == 'shifted_viterbi_proba':
-        input_size = 15
+        input_size = 19
     elif config.data_fe == 'shifted':
         input_size = 8
     else:

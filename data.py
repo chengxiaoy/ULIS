@@ -3,6 +3,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 import numpy as np
+import joblib
 
 
 def get_data(config):
@@ -29,6 +30,14 @@ def get_data(config):
     if config.data_fe == 'shifted_proba':
         Y_train_proba = np.load("data/Y_train_proba.npy")
         Y_test_proba = np.load("data/Y_test_proba.npy")
+
+        for i in range(11):
+            train[f"proba_{i}"] = Y_train_proba[:, i]
+            test[f"proba_{i}"] = Y_test_proba[:, i]
+    if config.data_fe == "shifted_viterbi_proba":
+
+        Y_train_proba = joblib.load('train_prob.pkl')
+        Y_test_proba = joblib.load('test_prob.pkl')
 
         for i in range(11):
             train[f"proba_{i}"] = Y_train_proba[:, i]

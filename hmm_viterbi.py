@@ -21,13 +21,15 @@ def viterbi(p_trans, p_signal, p_in, signal, index_id):
     p_max_pre = []
 
     for s in signal[1:]:
-        # p_state = np.exp2(p_state_log[-1])
-        # p_state_log[-1] = np.log2(p_state / np.sum(p_state))
+        p_state = np.exp2(p_state_log[-1])
+        p_state_log[-1] = np.log2(p_state / np.sum(p_state))
 
         p_max_pre.append(np.argmax(p_state_log[-1] + p_trans_tlog, axis=1))
         p_state_log.append(np.max(p_state_log[-1] + p_trans_tlog, axis=1) + p_signal_tlog[s])  # the Viterbi algorithm
 
-    # joblib.dump(p_state_log, "viterbi_pred_{}.pkl".format(index_id))
+    p_state = np.exp2(p_state_log[-1])
+    p_state_log[-1] = np.log2(p_state / np.sum(p_state))
+    joblib.dump(p_state_log, "viterbi_pred_test_{}.pkl".format(index_id))
 
     max_states = np.argmax(p_state_log, axis=1)  # finding the most probable states
     # return max_states
@@ -148,6 +150,7 @@ class ViterbiModel():
             signals = Kalman1D(signals, observation_covariance).reshape(-1)
 
         self.p_trans = calc_markov_p_trans(states)
+        # self.p_trans = self.p_trans[1:, 1:]
         # self.p_emit = calc_markov_p_signal_2(states, signals)
         self.p_emit, self.signal_bins = calc_markov_p_signal(states, signals)
         self.p_in = np.ones(len(self.p_trans)) / len(self.p_trans)
@@ -170,18 +173,56 @@ def test(train_group):
     model = ViterbiModel(kalman_filter=False)
     model.learning(true_state_train, signal_train)
     viterbi_state = model.decoding(signal_train, 0)
-    print(f1_score(true_state_train, viterbi_state,average='macro'))
+    print(f1_score(true_state_train, viterbi_state, average='macro'))
 
 
-def get_probe(test = False):
+def get_train_probe():
+    train_states, train_signals, train_groups, test_signals, test_groups = helper.load_data(kalman_filter=False)
 
-    return None
+    for i in range(1):
+        i = 9
+        train_state = train_states[i]
+        train_signal = train_signals[i]
+        model = ViterbiModel(kalman_filter=False)
+        model.learning(train_state, train_signal)
+        model.decoding(train_signal, i)
 
+
+def concate():
+    train_pro_dict = {}
+    for i in range(10):
+        train_pro_dict[i] = joblib.load('viterbi_pred_train_{}.pkl'.format(i))
+
+    train_prob = np.zeros((500 * 10000, 11))
+    row_index = 0
+    for i in range(9):
+        prob = np.array(train_pro_dict[i])
+        row, col = prob.shape
+        train_prob[row_index:row_index + row, 0:col] = np.exp2(prob)
+        row_index += row
+    train_prob[row_index:, 1:] = np.exp2(np.array(train_pro_dict[9]))
+    joblib.dump(train_prob, "train_prob.pkl")
+
+
+def concate_test():
+    train_pro_dict = {}
+    for i in range(11):
+        train_pro_dict[i] = joblib.load('viterbi_pred_test_{}.pkl'.format(i))
+
+    test_prob = np.zeros((200 * 10000, 11))
+    row_index = 0
+    for i in range(11):
+        prob = np.array(train_pro_dict[i])
+        row, col = prob.shape
+        test_prob[row_index:row_index + row, 0:col] = np.exp2(prob)
+        row_index += row
+    joblib.dump(test_prob, "test_prob.pkl")
 
 
 if __name__ == '__main__':
-
-    test([4])
+    concate()
+    concate_test()
+    # get_train_probe()
 
     # train_states, train_signals, train_groups, test_signals, test_groups = helper.load_data(kalman_filter=False)
     # test_y_pred = [None] * np.sum([len(x) for x in test_groups])
@@ -193,7 +234,7 @@ if __name__ == '__main__':
     #
     #     signal_train = np.concatenate(train_signals[train_group])
     #     true_state_train = np.concatenate(train_states[train_group])
-    #     model = ViterbiModel(kalman_filter=True)
+    #     model = ViterbiModel(kalman_filter=False)
     #     model.learning(true_state_train, signal_train)
     #
     #     for test_grp in test_group:

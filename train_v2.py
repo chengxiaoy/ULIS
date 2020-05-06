@@ -1,4 +1,4 @@
-from train_new import train_epoch_group, buildConfig,test_config
+from train_new import train_epoch_group, buildConfig, test_config
 
 if __name__ == '__main__':
 
@@ -23,7 +23,6 @@ if __name__ == '__main__':
     # config.use_swa = True
     # config_list.append(config)
 
-
     # config = buildConfig(1)
     # config.expriment_id = 104
     # config.loss = 'focal'
@@ -31,16 +30,12 @@ if __name__ == '__main__':
     # config.use_swa = True
     # config_list.append(config)
 
-
     # config = buildConfig(1)
     # config.expriment_id = 105
     # config.loss = 'ce'
     # config.schedular = 'cyc'
     # config.use_swa = True
     # config_list.append(config)
-
-
-
 
     # config = buildConfig(1)
     # config.expriment_id = 107
@@ -73,7 +68,6 @@ if __name__ == '__main__':
     # config.group_train = True
     #
     # config_list.append(config)
-
 
     # config = buildConfig(1)
     # config.expriment_id = 12
@@ -187,29 +181,33 @@ if __name__ == '__main__':
     # config.use_cbr = True
     # config_list.append(config)
 
-    config = buildConfig(1)
-    config.expriment_id = 123
-    config.loss = 'ce'
-    config.schedular = 'cyc'
-    config.early_stop_max = True
-    config.use_cbr = True
-    config.gaussian_noise = True
-    config_list.append(config)
+    # config = buildConfig(1)
+    # config.expriment_id = 123
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = True
+    # config.use_cbr = True
+    # config.gaussian_noise = True
+    # config_list.append(config)
+    #
+    # config = buildConfig(1)
+    # config.expriment_id = 124
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = True
+    # config.use_cbr = True
+    # config.drop_out = 0.5
+    # config_list.append(config)
 
     config = buildConfig(1)
-    config.expriment_id = 124
+    config.expriment_id = 125
+    config.data_fe = 'shifted_viterbi_proba'
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = True
     config.use_cbr = True
     config.drop_out = 0.5
     config_list.append(config)
-
-
-
-
-
-
 
     # for con in config_list:
     #     test_config(con)
@@ -238,8 +236,6 @@ if __name__ == '__main__':
     # config.model_name = 'seq2seq'
     #
     # config_list.append(config)
-
-
 
     for con in config_list:
         train_epoch_group(con)

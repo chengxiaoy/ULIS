@@ -43,6 +43,15 @@ def get_data(config):
             train[f"proba_{i}"] = Y_train_proba[:, i]
             test[f"proba_{i}"] = Y_test_proba[:, i]
 
+    if config.data_fe == "shifted_empty_proba":
+
+        Y_train_proba =np.zeros((500*10000,11))
+        Y_test_proba = np.zeros((200*10000,11))
+
+        for i in range(11):
+            train[f"proba_{i}"] = Y_train_proba[:, i]
+            test[f"proba_{i}"] = Y_test_proba[:, i]
+
     sub = pd.read_csv('data/sample_submission.csv')
     return train, test, sub
 

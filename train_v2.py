@@ -200,8 +200,8 @@ if __name__ == '__main__':
     # config_list.append(config)
 
     config = buildConfig(1)
-    config.expriment_id = 125
-    config.data_fe = 'shifted_viterbi_proba'
+    config.expriment_id = 126
+    config.data_fe = 'shifted_empty_proba'
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = True

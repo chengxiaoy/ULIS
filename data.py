@@ -43,6 +43,22 @@ def get_data(config):
             train[f"proba_{i}"] = Y_train_proba[:, i]
             test[f"proba_{i}"] = Y_test_proba[:, i]
 
+    if config.data_fe == "shifted_mix_proba":
+
+        Y_train_proba = joblib.load('data/train_prob.pkl')
+        Y_test_proba = joblib.load('data/test_prob.pkl')
+
+        for i in range(11):
+            train[f"proba_{i}"] = Y_train_proba[:, i]
+            test[f"proba_{i}"] = Y_test_proba[:, i]
+
+        Y_train_proba = np.load("data/Y_train_proba.npy")
+        Y_test_proba = np.load("data/Y_test_proba.npy")
+
+        for i in range(11):
+            train[f"rfc_proba_{i}"] = Y_train_proba[:, i]
+            test[f"rfc_proba_{i}"] = Y_test_proba[:, i]
+
     if config.data_fe == "shifted_empty_proba":
 
         Y_train_proba =np.zeros((500*10000,11))

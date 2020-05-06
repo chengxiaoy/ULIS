@@ -9,7 +9,8 @@ import time
 from pykalman import KalmanFilter
 import joblib
 
-def viterbi(p_trans, p_signal, p_in, signal,index_id):
+
+def viterbi(p_trans, p_signal, p_in, signal, index_id):
     offset = 10 ** (-20)  # added to values to avoid problems with log2(0)
 
     p_trans_tlog = np.transpose(np.log2(p_trans + offset))  # p_trans, logarithm + transposed
@@ -20,12 +21,13 @@ def viterbi(p_trans, p_signal, p_in, signal,index_id):
     p_max_pre = []
 
     for s in signal[1:]:
-        # p_state_log[-1] = p_state_log[-1]/np.sum(p_state_log[-1])
-        p_max_pre.append(np.argmax(p_state_log[-1] + p_trans_tlog, axis=1))
+        # p_state = np.exp2(p_state_log[-1])
+        # p_state_log[-1] = np.log2(p_state / np.sum(p_state))
 
+        p_max_pre.append(np.argmax(p_state_log[-1] + p_trans_tlog, axis=1))
         p_state_log.append(np.max(p_state_log[-1] + p_trans_tlog, axis=1) + p_signal_tlog[s])  # the Viterbi algorithm
 
-    joblib.dump(p_state_log,"viterbi_pred_{}.pkl".format(index_id))
+    # joblib.dump(p_state_log, "viterbi_pred_{}.pkl".format(index_id))
 
     max_states = np.argmax(p_state_log, axis=1)  # finding the most probable states
     # return max_states
@@ -151,35 +153,55 @@ class ViterbiModel():
         self.p_in = np.ones(len(self.p_trans)) / len(self.p_trans)
         return self
 
-    def decoding(self, signals,index_id):
+    def decoding(self, signals, index_id):
         if self.kalman_filter:
             observation_covariance = .0015
             signals = Kalman1D(signals, observation_covariance).reshape(-1)
         signal_dig = digitize_signal(signals, self.signal_bins)
         # return viterbi_2(self.p_trans, self.p_emit, self.p_in, signals)
-        return viterbi(self.p_trans, self.p_emit, self.p_in, signal_dig,index_id)
+        return viterbi(self.p_trans, self.p_emit, self.p_in, signal_dig, index_id)
+
+
+def test(train_group):
+    train_states, train_signals, train_groups, test_signals, test_groups = helper.load_data(kalman_filter=False)
+
+    signal_train = np.concatenate(train_signals[train_group])
+    true_state_train = np.concatenate(train_states[train_group])
+    model = ViterbiModel(kalman_filter=False)
+    model.learning(true_state_train, signal_train)
+    viterbi_state = model.decoding(signal_train, 0)
+    print(f1_score(true_state_train, viterbi_state,average='macro'))
+
+
+def get_probe(test = False):
+
+    return None
+
 
 
 if __name__ == '__main__':
 
-    train_states, train_signals, train_groups, test_signals, test_groups = helper.load_data(kalman_filter=False)
-    test_y_pred = [None] * np.sum([len(x) for x in test_groups])
-    for train_group, test_group in zip(train_groups, test_groups):
-        since = time.time()
+    test([4])
 
-        print("train_groups :", train_group, ", test_groups :", test_group)
-
-        signal_train = np.concatenate(train_signals[train_group])
-        true_state_train = np.concatenate(train_states[train_group])
-        model = ViterbiModel(kalman_filter=True)
-        model.learning(true_state_train, signal_train)
-
-        for test_grp in test_group:
-            test_y_pred[test_grp] = model.decoding(test_signals[test_grp],test_grp)
-        print("cost {} s".format(time.time() - since))
-
-    test_y_pred = np.concatenate(test_y_pred)
-
-    df_subm = pd.read_csv("data/sample_submission.csv")
-    df_subm['open_channels'] = test_y_pred
-    df_subm.to_csv("viterbi_new.csv", float_format='%.4f', index=False)
+    # train_states, train_signals, train_groups, test_signals, test_groups = helper.load_data(kalman_filter=False)
+    # test_y_pred = [None] * np.sum([len(x) for x in test_groups])
+    #
+    # for index, (train_group, test_group) in enumerate(zip(train_groups, test_groups)):
+    #     since = time.time()
+    #
+    #     print("train_groups :", train_group, ", test_groups :", test_group)
+    #
+    #     signal_train = np.concatenate(train_signals[train_group])
+    #     true_state_train = np.concatenate(train_states[train_group])
+    #     model = ViterbiModel(kalman_filter=True)
+    #     model.learning(true_state_train, signal_train)
+    #
+    #     for test_grp in test_group:
+    #         test_y_pred[test_grp] = model.decoding(test_signals[test_grp], test_grp)
+    #     print("cost {} s".format(time.time() - since))
+    #
+    # test_y_pred = np.concatenate(test_y_pred)
+    #
+    # df_subm = pd.read_csv("data/sample_submission.csv")
+    # df_subm['open_channels'] = test_y_pred
+    # df_subm.to_csv("viterbi_new.csv", float_format='%.4f', index=False)

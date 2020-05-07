@@ -199,14 +199,25 @@ if __name__ == '__main__':
     # config.drop_out = 0.5
     # config_list.append(config)
 
-    config = buildConfig(1)
-    config.expriment_id = 126
-    config.data_fe = 'shifted_empty_proba'
+    # config = buildConfig(1)
+    # config.expriment_id = 126
+    # config.data_fe = 'shifted_empty_proba'
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = True
+    # config.use_cbr = True
+    # config.drop_out = 0.5
+    # config_list.append(config)
+
+
+    config = buildConfig(0)
+    config.expriment_id = 127
+    config.data_fe = 'shifted_mix_proba'
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = True
     config.use_cbr = True
-    config.drop_out = 0.5
+    config.drop_out = 0.2
     config_list.append(config)
 
     # for con in config_list:

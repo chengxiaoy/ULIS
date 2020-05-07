@@ -1,6 +1,7 @@
 from torch import nn
 import torch
 import torch.nn.functional as F
+from unet import Unet
 
 
 class Seq2SeqRnn(nn.Module):
@@ -247,6 +248,9 @@ def getModel(config):
         input_size = 1
     if config.model_name == 'wave_net':
         model = WaveNet(input_size, config)
+
+    elif config.model_name == 'unet':
+        model = Unet(input_size, 11)
     elif config.model_name == 'seq2seq':
         model = Seq2SeqRnn(input_size=input_size, seq_len=config.GROUP_BATCH_SIZE, hidden_size=64, output_size=11,
                            num_layers=2,

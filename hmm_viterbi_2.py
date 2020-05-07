@@ -31,7 +31,7 @@ import joblib
 # pd1.to_csv("mix.csv",float_format='%.4f', index=False)
 
 preds = np.zeros((200 * 10000, 11))
-for i in [89,98,99]:
+for i in [89,98]:
     preds += joblib.load('pred_{}.pkl'.format(i))
 
 submission_csv_path = 'data/sample_submission.csv'

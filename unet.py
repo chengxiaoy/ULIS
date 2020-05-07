@@ -186,6 +186,8 @@ class Unet(nn.Module):
         features = self.encoder(x)
         x = self.decoder(features)
         x = self.segmentation_head(x)
+        x = x.permute(0, 2, 1)
+
         return x
 
 

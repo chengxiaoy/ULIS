@@ -182,6 +182,7 @@ class Unet(nn.Module):
         self.segmentation_head = nn.Conv1d(decoder_channels[-1], num_classes, kernel_size=1, padding=0, stride=1)
 
     def forward(self, x):
+        x = x.permute(0, 2, 1)
         features = self.encoder(x)
         x = self.decoder(features)
         x = self.segmentation_head(x)

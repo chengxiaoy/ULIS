@@ -173,8 +173,8 @@ def train_(model, train_dataloader, valid_dataloader, early_stopping,
             optimizer.zero_grad()
             predictions = model(x)
 
-            predictions_ = predictions.view(-1, predictions.shape[-1])
-            y_ = y.view(-1)
+            predictions_ = predictions.reshape(-1, predictions.shape[-1])
+            y_ = y.reshape(-1)
 
             loss = criterion(predictions_, y_)
             # backward pass: compute gradient of the loss with respect to model parameters
@@ -203,8 +203,8 @@ def train_(model, train_dataloader, valid_dataloader, early_stopping,
                 y = y.to(config.device)
 
                 predictions = model(x)
-                predictions_ = predictions.view(-1, predictions.shape[-1])
-                y_ = y.view(-1)
+                predictions_ = predictions.reshape(-1, predictions.shape[-1])
+                y_ = y.reshape(-1)
 
                 loss = criterion(predictions_, y_)
                 valid_losses.append(loss.item())
@@ -351,7 +351,7 @@ def train_epoch_group(config):
                     x = x.to(config.device)  # .to(device)
                     y = y.to(config.device)  # ..to(device)
                     predictions = model(x)
-                    predictions_ = predictions.view(-1, predictions.shape[-1])  # shape [128, 4000, 11]
+                    predictions_ = predictions.reshape(-1, predictions.shape[-1])  # shape [128, 4000, 11]
                     # print(predictions.shape, F.softmax(predictions_, dim=1).cpu().numpy().shape)
                     pred_list.append(F.softmax(predictions_, dim=1).cpu().numpy())  # shape (512000, 11)
                     # a = input()

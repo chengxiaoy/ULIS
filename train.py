@@ -220,7 +220,7 @@ if __name__ == '__main__':
 
     config = buildConfig(0)
     config.expriment_id = 99
-    config.model_name = 'unet'
+    # config.model_name = 'unet'
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = True

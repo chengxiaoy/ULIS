@@ -220,23 +220,36 @@ if __name__ == '__main__':
     # config.drop_out = 0.2
     # config_list.append(config)
 
-    config = buildConfig(1)
-    config.expriment_id = 210
-    config.NNBATCHSIZE = 64
-    config.GROUP_BATCH_SIZE = 2000
-    config.data_fe = 'shifted_mix_proba'
-    config.data_type = 'clean'
-    config.loss = 'ce'
-    config.schedular = 'cyc'
-    config.early_stop_max = True
-    config.use_cbr = True
-    config.drop_out = 0.2
-    config_list.append(config)
+    # config = buildConfig(1)
+    # config.expriment_id = 210
+    # config.NNBATCHSIZE = 64
+    # config.GROUP_BATCH_SIZE = 2000
+    # config.data_fe = 'shifted_mix_proba'
+    # config.data_type = 'clean'
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = True
+    # config.use_cbr = True
+    # config.drop_out = 0.2
+    # config_list.append(config)
+    #
+    # config = buildConfig(1)
+    # config.expriment_id = 211
+    # config.NNBATCHSIZE = 16
+    # config.GROUP_BATCH_SIZE = 8000
+    # config.data_fe = 'shifted_mix_proba'
+    # config.data_type = 'clean'
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = True
+    # config.use_cbr = True
+    # config.drop_out = 0.2
+    # config_list.append(config)
 
     config = buildConfig(1)
-    config.expriment_id = 211
-    config.NNBATCHSIZE = 16
-    config.GROUP_BATCH_SIZE = 8000
+    config.expriment_id = 210
+    config.NNBATCHSIZE = 32
+    config.GROUP_BATCH_SIZE = 2000
     config.data_fe = 'shifted_mix_proba'
     config.data_type = 'clean'
     config.loss = 'ce'

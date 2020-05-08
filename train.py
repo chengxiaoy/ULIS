@@ -218,9 +218,37 @@ if __name__ == '__main__':
     # config.drop_out = 0.5
     # config_list.append(config)
 
+    # config = buildConfig(0)
+    # config.expriment_id = 99
+    # config.model_name = 'unet'
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = True
+    # config.use_cbr = True
+    # config.drop_out = 0.2
+    # config_list.append(config)
+
+
+
     config = buildConfig(0)
-    config.expriment_id = 99
-    config.model_name = 'unet'
+    config.expriment_id = 1100
+    config.NNBATCHSIZE = 64
+    config.GROUP_BATCH_SIZE = 2000
+    config.model_name = 'shifted_mix_proba'
+    config.loss = 'ce'
+    config.schedular = 'cyc'
+    config.early_stop_max = True
+    config.use_cbr = True
+    config.drop_out = 0.2
+    config_list.append(config)
+
+
+
+    config = buildConfig(0)
+    config.expriment_id = 1101
+    config.NNBATCHSIZE = 16
+    config.GROUP_BATCH_SIZE = 8000
+    config.model_name = 'shifted_mix_proba'
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = True

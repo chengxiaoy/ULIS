@@ -234,7 +234,7 @@ if __name__ == '__main__':
     config.expriment_id = 1100
     config.NNBATCHSIZE = 64
     config.GROUP_BATCH_SIZE = 2000
-    config.model_name = 'shifted_mix_proba'
+    config.data_fe = 'shifted_mix_proba'
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = True
@@ -248,7 +248,7 @@ if __name__ == '__main__':
     config.expriment_id = 1101
     config.NNBATCHSIZE = 16
     config.GROUP_BATCH_SIZE = 8000
-    config.model_name = 'shifted_mix_proba'
+    config.data_fe = 'shifted_mix_proba'
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = True

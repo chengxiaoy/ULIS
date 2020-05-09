@@ -224,7 +224,7 @@ if __name__ == '__main__':
     concate_test()
     # get_train_probe()
 
-    # train_states, train_signals, train_groups, test_signals, test_groups = helper.load_data(kalman_filter=False)
+    train_states, train_signals, train_groups, test_signals, test_groups = helper.load_data(kalman_filter=False)
     # test_y_pred = [None] * np.sum([len(x) for x in test_groups])
     #
     # for index, (train_group, test_group) in enumerate(zip(train_groups, test_groups)):

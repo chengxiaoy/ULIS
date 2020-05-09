@@ -61,12 +61,18 @@ def get_data(config):
 
     if config.data_fe == "shifted_empty_proba":
 
-        Y_train_proba =np.zeros((500*10000,11))
-        Y_test_proba = np.zeros((200*10000,11))
+        Y_train_proba = np.zeros((500 * 10000, 11))
+        Y_test_proba = np.zeros((200 * 10000, 11))
 
         for i in range(11):
             train[f"proba_{i}"] = Y_train_proba[:, i]
             test[f"proba_{i}"] = Y_test_proba[:, i]
+
+    if config.viterbi_index:
+        train_viterbi_index = joblib.load('train_viterbi_index.pkl')
+        test_viterbi_index = joblib.load('train_viterbi_index.pkl')
+        train[f"viterbi_index"] = train_viterbi_index
+        test[f"viterbi_index"] = test_viterbi_index
 
     sub = pd.read_csv('data/sample_submission.csv')
     return train, test, sub
@@ -97,7 +103,7 @@ def lag_with_pct_change(df, windows):
 def run_feat_engineering(df):
     # create batches
     # create leads and lags (1, 2, 3 making them 6 features)
-    df = lag_with_pct_change(df, [1,2,3])
+    df = lag_with_pct_change(df, [1, 2, 3])
 
     # df = create_rolling_features(df, [3])
     # create signal ** 2 (this is the new feature)

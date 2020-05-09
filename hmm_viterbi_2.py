@@ -68,7 +68,8 @@ import helper
 import pandas as pd
 
 train_states, train_signals, train_groups, test_signals, test_groups = helper.load_data(kalman_filter=False)
-test_y_pred = [None] * np.sum([len(x) for x in test_groups])
+test_pred = [None] * np.sum([len(x) for x in test_groups])
+train_pred = [None] * np.sum([len(x) for x in test_groups])
 
 for index, (train_group, test_group) in enumerate(zip(train_groups, test_groups)):
     since = time.time()
@@ -82,19 +83,29 @@ for index, (train_group, test_group) in enumerate(zip(train_groups, test_groups)
     model = HiddenMarkovModel.from_samples(NormalDistribution, n_components=len(np.unique(true_state_train)),
                                            X=signal_train)
 
+    for train_grp in train_group:
+        test_list = train_signals[train_grp].reshape(-1, 4000)
+        state_list = []
+        for test in test_list:
+            state = model.viterbi(test)
+            for i, s in state[1][1:]:
+                state_list.append(i)
+        print(len(state_list))
+        train_pred[train_grp] = state_list
+    print("cost {} s".format(time.time() - since))
+
     for test_grp in test_group:
         test_list = test_signals[test_grp].reshape(-1, 4000)
         state_list = []
         for test in test_list:
             state = model.viterbi(test)
             for i, s in state[1][1:]:
-                state_list.extend(i)
+                state_list.append(i)
         print(len(state_list))
-        test_y_pred[test_grp] = state_list
+        test_pred[test_grp] = state_list
     print("cost {} s".format(time.time() - since))
 
-test_y_pred = np.concatenate(test_y_pred)
+test_y_pred = np.concatenate(test_pred)
+train_y_pred = np.concatenate(train_pred)
 
-df_subm = pd.read_csv("data/sample_submission.csv")
-df_subm['open_channels'] = test_y_pred
-df_subm.to_csv("viterbi_new.csv", float_format='%.4f', index=False)
+joblib.dump((test_y_pred, train_y_pred), "viterbi_index.pkl")

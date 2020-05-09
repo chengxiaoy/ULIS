@@ -33,6 +33,7 @@ def buildConfig(gpu_id):
     device = torch.device("cuda:" + str(gpu_id) if torch.cuda.is_available() else "cpu")
     data_type = "kalman_clean"  # raw clean kalman_clean
     data_fe = "shifted_proba"  # none "shifted"
+    viterbi_index = False
     outdir = 'wavenet_models'
     flip = False
     noise = False

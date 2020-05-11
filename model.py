@@ -210,13 +210,14 @@ class WaveNet(nn.Module):
 
         # x,_ = self.LSTM(x)
         x4 = self.wave_block4(x3)
+        if self.residual:
+            x4 += x3
         if self.use_se:
             x4 = self.se2(x4)
         if self.use_cbr:
             x4 = self.cbr2(x4)
 
-        # if self.residual:
-        #     x4 += x3
+
         x4 = x4.permute(0, 2, 1)
 
         if not self.use_cbr:

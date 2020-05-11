@@ -23,11 +23,11 @@ def get_data(config):
         train = pd.read_csv('data/train_clean_kalman.csv')
         test = pd.read_csv('data/test_clean_kalman.csv')
 
-    if config.gaussian_noise:
-        train_noise = np.random.normal(0, config.gaussian_noise_std, 500 * 10000)
-        test_noise = np.random.normal(0, config.gaussian_noise_std, 200 * 10000)
-        train['signal'] = train['signal'].values + train_noise
-        test['signal'] = test['signal'].values + test_noise
+    # if config.gaussian_noise:
+    #     train_noise = np.random.normal(0, config.gaussian_noise_std, 500 * 10000)
+    #     test_noise = np.random.normal(0, config.gaussian_noise_std, 200 * 10000)
+    #     train['signal'] = train['signal'].values + train_noise
+    #     test['signal'] = test['signal'].values + test_noise
 
     if config.data_fe == 'shifted_proba':
         Y_train_proba = np.load("data/Y_train_proba.npy")
@@ -200,16 +200,10 @@ class StratifiedGroupKFold(object):
 
 
 class IronDataset(Dataset):
-    def __init__(self, data, labels, training=True, transform=None, seq_len=5000, flip=0.5, noise_level=0,
-                 class_split=0.0):
+    def __init__(self, data, labels, config):
         self.data = data
         self.labels = labels
-        self.transform = transform
-        self.training = training
-        self.flip = flip
-        self.noise_level = noise_level
-        self.class_split = class_split
-        self.seq_len = seq_len
+        self.config = config
 
     def __len__(self):
         return len(self.data)
@@ -219,6 +213,8 @@ class IronDataset(Dataset):
             idx = idx.tolist()
 
         data = self.data[idx]
+        if self.config.gaussian_noise:
+            data = np.random.normal(0.0,self.config.gaussian_noise_std,(4000,1))+data
         labels = self.labels[idx]
 
         return [data.astype(np.float32), labels.astype(int)]

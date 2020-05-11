@@ -128,20 +128,18 @@ def get_data_loader(config, group_id=None):
     for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
         # build dataloader
         test_y = np.zeros([int(2000000 / config.GROUP_BATCH_SIZE), config.GROUP_BATCH_SIZE, 1])
-        test_dataset = IronDataset(test, test_y, flip=False)
+        test_dataset = IronDataset(test, test_y, config)
         if group_id is not None:
             train_group_indexs, test_group_indexs = get_group_index(group_id, len(train), len(test))
             train_index = np.intersect1d(train_index, train_group_indexs)
             val_index = np.intersect1d(val_index, train_group_indexs)
-            test_dataset = IronDataset(test[test_group_indexs], test_y[test_group_indexs], flip=False, noise_level=0.0)
+            test_dataset = IronDataset(test[test_group_indexs], test_y[test_group_indexs],config)
 
         test_dataloader = DataLoader(test_dataset, config.NNBATCHSIZE, shuffle=False)
-        train_dataset = IronDataset(train[train_index], train_tr[train_index], seq_len=config.GROUP_BATCH_SIZE,
-                                    flip=config.flip,
-                                    noise_level=config.noise)
+        train_dataset = IronDataset(train[train_index], train_tr[train_index], config)
         train_dataloader = DataLoader(train_dataset, config.NNBATCHSIZE, shuffle=True, num_workers=16)
 
-        valid_dataset = IronDataset(train[val_index], train_tr[val_index], seq_len=config.GROUP_BATCH_SIZE, flip=False)
+        valid_dataset = IronDataset(train[val_index], train_tr[val_index], config)
         valid_dataloader = DataLoader(valid_dataset, config.NNBATCHSIZE, shuffle=False)
 
         train_dataloaders.append(train_dataloader)

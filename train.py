@@ -192,8 +192,6 @@ if __name__ == '__main__':
     # config.drop_out = 0.5
     # config_list.append(config)
 
-
-
     # config = buildConfig(0)
     # config.data_type  = 'clean'
     # config.expriment_id = 94
@@ -203,8 +201,6 @@ if __name__ == '__main__':
     # config.use_cbr = True
     # config.drop_out = 0.5
     # config_list.append(config)
-
-
 
     # shift 1,2,3
     # config = buildConfig(0)
@@ -227,8 +223,6 @@ if __name__ == '__main__':
     # config.use_cbr = True
     # config.drop_out = 0.2
     # config_list.append(config)
-
-
 
     # config = buildConfig(0)
     # config.expriment_id = 1100
@@ -256,10 +250,11 @@ if __name__ == '__main__':
     # config.drop_out = 0.2
     # config_list.append(config)
 
-
     config = buildConfig(0)
-    config.expriment_id = 155
+    config.expriment_id = 156
+    # config.data_type = 'clean'
     config.data_fe = 'shifted_viterbi_proba'
+    config.gaussian_noise = True
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = True

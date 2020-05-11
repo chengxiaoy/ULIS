@@ -47,6 +47,7 @@ def buildConfig(gpu_id):
     gaussian_noise = False
     gaussian_noise_std = 0.1
     drop_out = 0.2
+    residual = False
 
     group_train = False
     config = AttrDict({'EPOCHS': EPOCHS, 'NNBATCHSIZE': NNBATCHSIZE, 'GROUP_BATCH_SIZE': GROUP_BATCH_SIZE, 'SEED': SEED,
@@ -55,7 +56,7 @@ def buildConfig(gpu_id):
                        'flip': flip, 'group_train': group_train, 'loss': loss, "schedular": schedular,
                        'use_swa': use_swa, 'use_cbr': use_cbr, 'early_stop_max': early_stop_max, 'use_se': use_se,
                        'gaussian_noise': gaussian_noise, "gaussian_noise_std": gaussian_noise_std,
-                       'drop_out': drop_out,'viterbi_index':viterbi_index})
+                       'drop_out': drop_out,'viterbi_index':viterbi_index,'residual':residual})
     return config
 
 

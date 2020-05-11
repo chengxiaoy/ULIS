@@ -154,6 +154,7 @@ class WaveNet(nn.Module):
         self.use_cbr = config.use_cbr
         self.dropout = nn.Dropout(config.drop_out)
         self.use_se = config.use_se
+        self.residual = config.residual
         if config.use_se:
             self.se1 = SELayer(128)
             self.se2 = SELayer(128)
@@ -188,34 +189,45 @@ class WaveNet(nn.Module):
             x = self.cbr1(x)
         if self.use_se:
             x = self.se1(x)
-        x = self.wave_block1(x)
-        if self.use_cbr:
-            x = self.bn1(x)
 
-        x = self.wave_block2(x)
+        x1 = self.wave_block1(x)
         if self.use_cbr:
-            x = self.bn2(x)
-        x = self.wave_block3(x)
+            x1 = self.bn1(x1)
+        if self.residual:
+            x1 += x
+
+        x2 = self.wave_block2(x1)
         if self.use_cbr:
-            x = self.bn3(x)
+            x2 = self.bn2(x2)
+        if self.residual:
+            x2 += x1
+
+        x3 = self.wave_block3(x2)
+        if self.use_cbr:
+            x3 = self.bn3(x3)
+        if self.residual:
+            x3 += x2
+
         # x,_ = self.LSTM(x)
-        x = self.wave_block4(x)
-
+        x4 = self.wave_block4(x3)
         if self.use_se:
-            x = self.se2(x)
+            x4 = self.se2(x4)
         if self.use_cbr:
-            x = self.cbr2(x)
-        x = x.permute(0, 2, 1)
+            x4 = self.cbr2(x4)
+
+        if self.residual:
+            x4 += x3
+        x4 = x4.permute(0, 2, 1)
 
         if not self.use_cbr:
-            x, _ = self.LSTM(x)
-        x = self.dropout(x)
+            x4, _ = self.LSTM(x4)
+        x4 = self.dropout(x4)
         # x = self.conv1(x)
         # print(x.shape)
         # x = self.rnn(x)
         # x = self.attention(x)
-        x = self.fc(x)
-        return x
+        x4 = self.fc(x4)
+        return x4
 
 
 class SELayer(nn.Module):

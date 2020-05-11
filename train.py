@@ -251,7 +251,7 @@ if __name__ == '__main__':
     # config_list.append(config)
 
     config = buildConfig(0)
-    config.expriment_id = 156
+    config.expriment_id = 157
     # config.data_type = 'clean'
     config.data_fe = 'shifted_viterbi_proba'
     config.gaussian_noise = True

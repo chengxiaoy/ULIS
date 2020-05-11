@@ -55,7 +55,7 @@ def buildConfig(gpu_id):
                        'flip': flip, 'group_train': group_train, 'loss': loss, "schedular": schedular,
                        'use_swa': use_swa, 'use_cbr': use_cbr, 'early_stop_max': early_stop_max, 'use_se': use_se,
                        'gaussian_noise': gaussian_noise, "gaussian_noise_std": gaussian_noise_std,
-                       'drop_out': drop_out})
+                       'drop_out': drop_out,'viterbi_index':viterbi_index})
     return config
 
 

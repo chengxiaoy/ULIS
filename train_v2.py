@@ -246,15 +246,29 @@ if __name__ == '__main__':
     # config.drop_out = 0.2
     # config_list.append(config)
 
+    # config = buildConfig(1)
+    # config.expriment_id = 222
+    # config.data_fe = 'shifted_mix_proba'
+    # config.data_type = 'clean'
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = True
+    # config.use_cbr = True
+    # config.group_train = True
+    # config.drop_out = 0.2
+    # config_list.append(config)
+
+
+
     config = buildConfig(1)
-    config.expriment_id = 222
+    config.expriment_id = 223
+    config.SPLITS =10
     config.data_fe = 'shifted_mix_proba'
     config.data_type = 'clean'
     config.loss = 'ce'
     config.schedular = 'cyc'
     config.early_stop_max = True
     config.use_cbr = True
-    config.group_train = True
     config.drop_out = 0.2
     config_list.append(config)
 

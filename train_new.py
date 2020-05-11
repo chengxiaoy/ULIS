@@ -56,7 +56,7 @@ def buildConfig(gpu_id):
                        'flip': flip, 'group_train': group_train, 'loss': loss, "schedular": schedular,
                        'use_swa': use_swa, 'use_cbr': use_cbr, 'early_stop_max': early_stop_max, 'use_se': use_se,
                        'gaussian_noise': gaussian_noise, "gaussian_noise_std": gaussian_noise_std,
-                       'drop_out': drop_out,'viterbi_index':viterbi_index,'residual':residual})
+                       'drop_out': drop_out, 'viterbi_index': viterbi_index, 'residual': residual})
     return config
 
 
@@ -128,18 +128,18 @@ def get_data_loader(config, group_id=None):
     for index, (train_index, val_index, _) in enumerate(new_splits[0:], start=0):
         # build dataloader
         test_y = np.zeros([int(2000000 / config.GROUP_BATCH_SIZE), config.GROUP_BATCH_SIZE, 1])
-        test_dataset = IronDataset(test, test_y, config)
+        test_dataset = IronDataset(test, test_y, config, training=False)
         if group_id is not None:
             train_group_indexs, test_group_indexs = get_group_index(group_id, len(train), len(test))
             train_index = np.intersect1d(train_index, train_group_indexs)
             val_index = np.intersect1d(val_index, train_group_indexs)
-            test_dataset = IronDataset(test[test_group_indexs], test_y[test_group_indexs],config)
+            test_dataset = IronDataset(test[test_group_indexs], test_y[test_group_indexs], config, training=False)
 
         test_dataloader = DataLoader(test_dataset, config.NNBATCHSIZE, shuffle=False)
-        train_dataset = IronDataset(train[train_index], train_tr[train_index], config)
+        train_dataset = IronDataset(train[train_index], train_tr[train_index], config, training=True)
         train_dataloader = DataLoader(train_dataset, config.NNBATCHSIZE, shuffle=True, num_workers=16)
 
-        valid_dataset = IronDataset(train[val_index], train_tr[val_index], config)
+        valid_dataset = IronDataset(train[val_index], train_tr[val_index], config, training=False)
         valid_dataloader = DataLoader(valid_dataset, config.NNBATCHSIZE, shuffle=False)
 
         train_dataloaders.append(train_dataloader)

@@ -200,10 +200,11 @@ class StratifiedGroupKFold(object):
 
 
 class IronDataset(Dataset):
-    def __init__(self, data, labels, config):
+    def __init__(self, data, labels, config, training=True):
         self.data = data
         self.labels = labels
         self.config = config
+        self.training = training
 
     def __len__(self):
         return len(self.data)
@@ -213,8 +214,8 @@ class IronDataset(Dataset):
             idx = idx.tolist()
 
         data = self.data[idx]
-        if self.config.gaussian_noise:
-            data = np.random.normal(0.0,self.config.gaussian_noise_std,(4000,1))+data
+        if self.config.gaussian_noise and self.training:
+            data = np.random.normal(0.0, self.config.gaussian_noise_std, (4000, 1)) + data
         labels = self.labels[idx]
 
         return [data.astype(np.float32), labels.astype(int)]

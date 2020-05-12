@@ -252,8 +252,8 @@ if __name__ == '__main__':
 
     config = buildConfig(0)
     config.expriment_id = 158
-    # config.data_type = 'clean'
-    # config.data_fe = 'shifted_viterbi_proba'
+    config.data_type = 'clean'
+    config.data_fe = 'shifted_viterbi_proba'
     config.gaussian_noise = True
     config.gaussian_noise_std = 0.5
     config.loss = 'ce'

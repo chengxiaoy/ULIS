@@ -249,20 +249,35 @@ if __name__ == '__main__':
     # config.use_cbr = True
     # config.drop_out = 0.2
     # config_list.append(config)
+    #
+    # config = buildConfig(0)
+    # config.expriment_id = 158
+    # config.data_type = 'clean'
+    # config.data_fe = 'shifted_viterbi_proba'
+    # config.gaussian_noise = True
+    # config.gaussian_noise_std = 0.5
+    # config.loss = 'ce'
+    # config.schedular = 'cyc'
+    # config.early_stop_max = True
+    # config.use_cbr = True
+    # config.drop_out = 0.5
+    # config.residual = True
+    # config_list.append(config)
 
     config = buildConfig(0)
-    config.expriment_id = 158
+    config.expriment_id = 159
     config.data_type = 'clean'
     config.data_fe = 'shifted_viterbi_proba'
     config.gaussian_noise = True
     config.gaussian_noise_std = 0.5
-    config.loss = 'ce'
+    config.loss = 'focal'
     config.schedular = 'cyc'
     config.early_stop_max = True
     config.use_cbr = True
     config.drop_out = 0.5
     config.residual = True
     config_list.append(config)
+
 
     # for con in config_list:
     #     test_config(con)
